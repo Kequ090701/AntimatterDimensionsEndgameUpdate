@@ -2,6 +2,7 @@ import { GameMechanicState } from "../game-mechanics";
 
 import { SteamRuntime } from "@/steam";
 
+
 class AchievementState extends GameMechanicState {
   constructor(config) {
     super(config);
