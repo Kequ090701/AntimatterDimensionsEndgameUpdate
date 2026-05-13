@@ -1,4 +1,4 @@
-import * as ADNotations from "@antimatter-dimensions/notations";
+import * as ADNotations from "adnot-beport-small";
 
 import { DEV } from "@/env";
 import { devMigrations } from "./dev-migrations";
@@ -236,7 +236,7 @@ export const GameStorage = {
     }
     checkNaN(save, "player");
 
-    if (invalidProps.length === 0) return "";
+    if (invalidProps.length === 0 || player.DEV) return "";
     return `${quantify("NaN player property", invalidProps.length)} found:
       ${invalidProps.join(", ")}`;
   },
@@ -483,6 +483,7 @@ export const GameStorage = {
     Glyphs.unseen = [];
     Glyphs.unequipped = [];
     Notations.find(player.options.notation).setAsCurrent(true);
+    LNotations.find(player.options.lnotation).setAsCurrent(true);
     ADNotations.Settings.exponentCommas.min = 10 ** player.options.notationDigits.comma;
     ADNotations.Settings.exponentCommas.max = 10 ** player.options.notationDigits.notation;
 

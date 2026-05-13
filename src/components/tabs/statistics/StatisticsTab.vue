@@ -12,6 +12,7 @@ export default {
       isDoomed: false,
       realTimeDoomed: TimeSpan.zero,
       totalAntimatter: new Decimal(0),
+      totalAntimatterOutsideDoom: new Decimal(0),
       realTimePlayed: TimeSpan.zero,
       timeSinceCreation: 0,
       uniqueNews: 0,
@@ -23,6 +24,7 @@ export default {
         banked: new Decimal(0),
         projectedBanked: new Decimal(0),
         bankRate: new Decimal(0),
+        totalInfinityAntimatter: new Decimal(0),
         hasBest: false,
         best: TimeSpan.zero,
         this: TimeSpan.zero,
@@ -32,6 +34,7 @@ export default {
       eternity: {
         isUnlocked: false,
         count: new Decimal(0),
+        totalEternityAntimatter: new Decimal(0),
         hasBest: false,
         best: TimeSpan.zero,
         this: TimeSpan.zero,
@@ -41,6 +44,8 @@ export default {
       reality: {
         isUnlocked: false,
         count: 0,
+        totalRealityAntimatter: new Decimal(0),
+        hasBest: false,
         best: TimeSpan.zero,
         bestReal: TimeSpan.zero,
         this: TimeSpan.zero,
@@ -48,6 +53,18 @@ export default {
         totalTimePlayed: TimeSpan.zero,
         bestRate: new Decimal(0),
         bestRarity: 0,
+      },
+      endgame: {
+        isUnlocked: false,
+        count: 0,
+        totalEndgameAntimatter: new Decimal(0),
+        hasBest: false,
+        best: TimeSpan.zero,
+        bestReal: TimeSpan.zero,
+        this: TimeSpan.zero,
+        thisReal: TimeSpan.zero,
+        bestRateCP: new Decimal(0),
+        bestRateDP: new Decimal(0),
       },
       matterScale: [],
       lastMatterTime: 0,
@@ -70,6 +87,18 @@ export default {
         ? `${this.formatDecimalAmount(num)} ${pluralize("Eternity", num.floor())}`
         : "no Eternities";
     },
+    realityCountString() {
+      const num = new Decimal(this.reality.count);
+      return num.gt(0)
+        ? `${this.formatDecimalAmount(num)} ${pluralize("Reality", num.floor())}`
+        : "no Realities";
+    },
+    endgameCountString() {
+      const num = new Decimal(this.endgame.count);
+      return num.gt(0)
+        ? `${this.formatDecimalAmount(num)} ${pluralize("Endgame", num.floor())}`
+        : "no Endgames";
+    },
     fullGameCompletions() {
       return player.records.fullGameCompletions;
     },
@@ -77,15 +106,17 @@ export default {
       return Time.toDateTimeString(player.records.gameCreatedTime);
     },
     saveAge() {
-      return TimeSpan.fromMilliseconds(this.timeSinceCreation);
+      return TimeSpan.fromMilliseconds(new Decimal(this.timeSinceCreation));
     },
   },
   methods: {
     update() {
       const records = player.records;
       this.totalAntimatter.copyFrom(records.totalAntimatter);
-      this.realTimePlayed.setFrom(records.realTimePlayed);
-      this.fullTimePlayed = TimeSpan.fromMilliseconds(records.previousRunRealTime + records.realTimePlayed);
+      this.totalAntimatterOutsideDoom.copyFrom(player.records.totalAntimatterOutsideDoom);
+      this.realTimePlayed.setFrom(new Decimal(records.realTimePlayed));
+      this.fullTimePlayed = TimeSpan.fromMilliseconds(
+        new Decimal(records.previousRunRealTime + records.realTimePlayed));
       this.uniqueNews = NewsHandler.uniqueTickersSeen;
       this.totalNews = player.news.totalSeen;
       this.secretAchievementCount = SecretAchievements.all.filter(a => a.isUnlocked).length;
@@ -101,10 +132,11 @@ export default {
         infinity.banked.copyFrom(Currency.infinitiesBanked);
         infinity.projectedBanked = new Decimal(0).plusEffectsOf(
           Achievement(131).effects.bankedInfinitiesGain,
-          TimeStudy(191)
+          TimeStudy(191).effects.bankedInfinitiesGain,
         );
-        infinity.bankRate = infinity.projectedBanked.div(Math.clampMin(33, records.thisEternity.time)).times(60000);
-        infinity.hasBest = bestInfinity.time < 999999999999;
+        infinity.bankRate = infinity.projectedBanked.div(Decimal.clampMin(33, records.thisEternity.time)).times(60000);
+        infinity.totalInfinityAntimatter.copyFrom(records.totalInfinityAntimatter);
+        infinity.hasBest = bestInfinity.time.lt(999999999999);
         infinity.best.setFrom(bestInfinity.time);
         infinity.this.setFrom(records.thisInfinity.time);
         infinity.bestRate.copyFrom(bestInfinity.bestIPminEternity);
@@ -116,7 +148,8 @@ export default {
       eternity.isUnlocked = isEternityUnlocked;
       if (isEternityUnlocked) {
         eternity.count.copyFrom(Currency.eternities);
-        eternity.hasBest = bestEternity.time < 999999999999;
+        eternity.totalEternityAntimatter.copyFrom(records.totalEternityAntimatter);
+        eternity.hasBest = bestEternity.time.lt(999999999999);
         eternity.best.setFrom(bestEternity.time);
         eternity.this.setFrom(records.thisEternity.time);
         eternity.bestRate.copyFrom(bestEternity.bestEPminReality);
@@ -129,22 +162,41 @@ export default {
 
       if (isRealityUnlocked) {
         reality.count = Math.floor(Currency.realities.value);
+        reality.totalRealityAntimatter.copyFrom(records.totalRealityAntimatter);
+        reality.hasBest = bestReality.time.lt(999999999999);
         reality.best.setFrom(bestReality.time);
-        reality.bestReal.setFrom(bestReality.realTime);
+        reality.bestReal.setFrom(new Decimal(bestReality.realTime));
         reality.this.setFrom(records.thisReality.time);
         reality.totalTimePlayed.setFrom(records.totalTimePlayed);
         // Real time tracking is only a thing once reality is unlocked:
-        infinity.thisReal.setFrom(records.thisInfinity.realTime);
+        infinity.thisReal.setFrom(new Decimal(records.thisInfinity.realTime));
         infinity.bankRate = infinity.projectedBanked.div(Math.clampMin(33, records.thisEternity.realTime)).times(60000);
-        eternity.thisReal.setFrom(records.thisEternity.realTime);
-        reality.thisReal.setFrom(records.thisReality.realTime);
+        eternity.thisReal.setFrom(new Decimal(records.thisEternity.realTime));
+        reality.thisReal.setFrom(new Decimal(records.thisReality.realTime));
         reality.bestRate.copyFrom(bestReality.RMmin);
         reality.bestRarity = Math.max(strengthToRarity(bestReality.glyphStrength), 0);
+      }
+
+      const isEndgameUnlocked = progress.isEndgameUnlocked;
+      const endgame = this.endgame;
+      const bestEndgame = records.bestEndgame;
+      endgame.isUnlocked = isEndgameUnlocked;
+      
+      if (isEndgameUnlocked) {
+        endgame.count = Math.floor(player.endgames);
+        endgame.totalEndgameAntimatter.copyFrom(records.totalEndgameAntimatter);
+        endgame.hasBest = bestEndgame.realTime <= 999999999999;
+        endgame.best.setFrom(bestEndgame.time);
+        endgame.bestReal.setFrom(new Decimal(bestEndgame.realTime));
+        endgame.this.setFrom(records.thisEndgame.time);
+        endgame.thisReal.setFrom(new Decimal(records.thisEndgame.realTime));
+        endgame.bestRateCP.copyFrom(bestEndgame.bestCPmin);
+        endgame.bestRateDP.copyFrom(bestEndgame.bestDPmin);
       }
       this.updateMatterScale();
 
       this.isDoomed = Pelle.isDoomed;
-      this.realTimeDoomed.setFrom(player.records.realTimeDoomed);
+      this.realTimeDoomed.setFrom(new Decimal(player.records.realTimeDoomed));
       this.paperclips = player.news.specialTickerData.paperclips;
     },
     formatDecimalAmount(value) {
@@ -179,6 +231,22 @@ export default {
       </div>
       <div class="c-stats-tab-general">
         <div>You have made a total of {{ format(totalAntimatter, 2, 1) }} antimatter.</div>
+        <div v-if="endgame.isUnlocked">
+          You have made a total of {{ format(totalAntimatterOutsideDoom, 2, 1) }} antimatter outside Doom.
+        </div>
+        <div v-if="endgame.isUnlocked">
+          You have made a total of {{ format(endgame.totalEndgameAntimatter, 2, 1) }} antimatter this Endgame.
+        </div>
+        <div v-if="reality.isUnlocked" :class="{ 'c-stats-tab-doomed' : isDoomed }">
+          You have made a total of {{ format(reality.totalRealityAntimatter, 2, 1) }} antimatter
+          this {{ isDoomed ? "Armageddon" : "Reality" }}.
+        </div>
+        <div v-if="eternity.isUnlocked">
+          You have made a total of {{ format(eternity.totalEternityAntimatter, 2, 1) }} antimatter this Eternity.
+        </div>
+        <div v-if="infinity.isUnlocked">
+          You have made a total of {{ format(infinity.totalInfinityAntimatter, 2, 1) }} antimatter this Infinity.
+        </div>
         <div>You have played for {{ realTimePlayed }}. (real time)</div>
         <div v-if="reality.isUnlocked">
           Your existence has spanned {{ reality.totalTimePlayed }} of time. (game time)
@@ -188,7 +256,7 @@ export default {
         </div>
         <br>
         <div>
-          You have seen {{ quantifyInt("news message", totalNews) }} in total.
+          You have seen {{ quantifyHybridSmall("news message", totalNews) }} in total.
         </div>
         <div>
           You have seen {{ quantifyInt("unique news message", uniqueNews) }}.
@@ -300,9 +368,16 @@ export default {
       <div :class="realityClassObject()">
         {{ isDoomed ? "Doomed Reality" : "Reality" }}
       </div>
-      <div>You have {{ quantifyInt("Reality", reality.count) }}.</div>
-      <div>Your fastest game-time Reality was {{ reality.best.toStringShort() }}.</div>
-      <div>Your fastest real-time Reality was {{ reality.bestReal.toStringShort() }}.</div>
+      <div>
+        You have {{ realityCountString }}<span v-if="endgame.isUnlocked"> this Endgame</span>.
+      </div>
+      <div v-if="reality.hasBest">
+        Your fastest game-time Reality was {{ reality.best.toStringShort() }}.
+        Your fastest real-time Reality was {{ reality.bestReal.toStringShort() }}.
+      </div>
+      <div v-else>
+        You have no fastest Reality<span v-if="endgame.isUnlocked"> this Endgame</span>.
+      </div>
       <div :class="{ 'c-stats-tab-doomed' : isDoomed }">
         You have spent {{ reality.this.toStringShort() }}
         in this {{ isDoomed ? "Armageddon" : "Reality" }}.
@@ -315,9 +390,46 @@ export default {
         You have been Doomed for {{ realTimeDoomed.toStringShort() }}, real time.
       </div>
       <div>
-        Your best Reality Machines per minute is {{ format(reality.bestRate, 2, 2) }}.
+        Your best Reality Machines per minute 
+        <span v-if="endgame.isUnlocked">this Endgame </span>
+        is {{ format(reality.bestRate, 2, 2) }}.
       </div>
-      <div>Your best Glyph rarity is {{ formatRarity(reality.bestRarity) }}.</div>
+      <div>
+        Your best Glyph rarity
+        <span v-if="endgame.isUnlocked">this Endgame </span>
+        is {{ formatRarity(reality.bestRarity) }}.</div>
+      <br>
+    </div>
+    <div
+      v-if="endgame.isUnlocked"
+      class="c-stats-tab-subheader c-stats-tab-general"
+    >
+      <div class="c-stats-tab-title c-stats-tab-endgame">
+        Endgame
+      </div>
+      <div>
+        You have {{ endgameCountString }}.
+      </div>
+      <div v-if="endgame.hasBest">
+        Your fastest game-time Endgame was {{ endgame.best.toStringShort() }}.
+        Your fastest real-time Endgame was {{ endgame.bestReal.toStringShort() }}.
+      </div>
+      <div v-else>
+        You have no fastest Endgame.
+      </div>
+      <div>
+        You have spent {{ endgame.this.toStringShort() }}
+        in this Endgame.
+        ({{ endgame.thisReal.toStringShort() }} real time)
+      </div>
+      <div>
+        Your best Celestial Points per minute 
+        is {{ format(endgame.bestRateCP, 2, 2) }}.
+      </div>
+      <div>
+        Your best Doomed Particles per minute 
+        is {{ format(endgame.bestRateDP, 2, 2) }}.
+      </div>
       <br>
     </div>
   </div>
@@ -355,5 +467,9 @@ export default {
 
 .c-stats-tab-doomed {
   color: var(--color-pelle--base);
+}
+
+.c-stats-tab-endgame {
+  color: var(--color-endgame);
 }
 </style>

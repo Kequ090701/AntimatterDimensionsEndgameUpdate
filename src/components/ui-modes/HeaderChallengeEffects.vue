@@ -38,18 +38,18 @@ export default {
       }
       this.isInLaitela = Laitela.isRunning;
       if (this.isInLaitela) {
-        if (player.celestials.laitela.entropy > 0) {
-          this.laitelaEntropy = `${formatPercents(player.celestials.laitela.entropy, 2, 2)}`;
+        if (player.celestials.laitela.entropy.gt(0)) {
+          this.laitelaEntropy = `${formatPercents(new Decimal(player.celestials.laitela.entropy).toNumber(), 2, 2)}`;
           this.laitelaTimer = Time.thisRealityRealTime.toStringShort();
         } else {
           this.laitelaEntropy = `${formatPercents(1, 2, 2)}`;
-          this.laitelaTimer = TimeSpan.fromSeconds(player.celestials.laitela.thisCompletion).toStringShort();
+          this.laitelaTimer = TimeSpan.fromSeconds(new Decimal(player.celestials.laitela.thisCompletion)).toStringShort();
         }
       }
 
       this.waitingforHint = Enslaved.canTickHintTimer;
       const rawMsUntilHints = 5 * 3600 * 1000 - player.celestials.enslaved.hintUnlockProgress;
-      this.enslavedTimer = TimeSpan.fromMilliseconds(rawMsUntilHints / (Enslaved.isRunning ? 1 : 0.4))
+      this.enslavedTimer = TimeSpan.fromMilliseconds(new Decimal(rawMsUntilHints / (Enslaved.isRunning ? 1 : 0.4)))
         .toStringShort();
     },
     updateChallengePower() {

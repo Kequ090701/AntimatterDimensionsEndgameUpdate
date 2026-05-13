@@ -19,6 +19,10 @@ export default {
       incomeType: "",
       areAutobuyersUnlocked: false,
       showLockedDimCostNote: true,
+      isEndgameUnlocked: false,
+      timeDimCompressionMagnitude: 0,
+      timeDimOverflow: 0,
+      timeDimStart: new Decimal(0)
     };
   },
   computed: {
@@ -35,6 +39,10 @@ export default {
       this.shardsPerSecond.copyFrom(TimeDimension(1).productionPerSecond);
       this.incomeType = EternityChallenge(7).isRunning ? "Eighth Infinity Dimensions" : "Time Shards";
       this.areAutobuyersUnlocked = Autobuyer.timeDimension(1).isUnlocked;
+      this.isEndgameUnlocked = PlayerProgress.endgameUnlocked();
+      this.timeDimCompressionMagnitude = TimeDimensions.compressionMagnitude;
+      this.timeDimOverflow = 1 / this.timeDimCompressionMagnitude;
+      this.timeDimStart = TimeDimensions.OVERFLOW;
     },
     maxAll() {
       tryUnlockTimeDimensions();
@@ -67,7 +75,7 @@ export default {
     <div>
       <p>
         You have gained
-        <span class="c-time-dim-description__accent">{{ formatInt(totalUpgrades) }}</span> Tickspeed upgrades from
+        <span class="c-time-dim-description__accent">{{ formatHybridLarge(totalUpgrades, 3) }}</span> Tickspeed upgrades from
         <span class="c-time-dim-description__accent">{{ format(timeShards, 2, 1) }}</span> Time Shards.
       </p>
       <p>
@@ -78,8 +86,20 @@ export default {
       </p>
     </div>
     <div>
+      <p>
+        <span v-if="isEndgameUnlocked">
+          Your Time Dimension Compression Magnitude is
+          <span class="c-time-dim-compression-description__accent">{{ format(timeDimCompressionMagnitude, 2, 3) }}</span>,
+          which raises all Time Dimension Multipliers to the power of
+          <span class="c-time-dim-compression-description__accent">{{ format(timeDimOverflow, 2, 3) }}</span>
+          while above
+          <span>{{ formatPostBreak(timeDimStart, 2, 1) }}</span>.
+        </span>
+      </p>
+    </div>
+    <div>
       The amount each additional upgrade requires will start
-      increasing above {{ formatInt(tickspeedSoftcap) }} Tickspeed upgrades.
+      increasing above {{ formatHybridLarge(tickspeedSoftcap, 3) }} Tickspeed upgrades.
     </div>
     <div>You are getting {{ format(shardsPerSecond, 2, 0) }} {{ incomeType }} per second.</div>
     <div class="l-dimensions-container">

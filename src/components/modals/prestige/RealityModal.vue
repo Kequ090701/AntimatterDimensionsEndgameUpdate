@@ -24,7 +24,7 @@ export default {
       level: 0,
       simRealities: 0,
       realityMachines: new Decimal(),
-      shardsGained: 0,
+      shardsGained: new Decimal(0),
       effarigUnlocked: false,
       willAutoPurge: false,
     };
@@ -34,7 +34,7 @@ export default {
       return `Reality will reset everything except Challenge records and anything under the General header on the
         Statistics tab. The first ${formatInt(13)} rows of Achievements are also reset,
         but you will automatically get one Achievement back every
-        ${timeDisplayNoDecimals(30 * 60000)}. You will also gain Reality Machines based on your Eternity Points, a
+        ${timeDisplayNoDecimals(new Decimal(30 * 60000))}. You will also gain Reality Machines based on your Eternity Points, a
         Glyph with a level based on your Eternity Points, Replicanti, and Dilated Time, a Perk Point to spend
         on quality of life upgrades, and unlock various upgrades.`;
     },
@@ -94,7 +94,7 @@ export default {
       this.hasSpace = GameCache.glyphInventorySpace.value >= this.simRealities;
       const simRMGained = MachineHandler.gainedRealityMachines.times(this.simRealities);
       this.realityMachines.copyFrom(simRMGained.clampMax(MachineHandler.distanceToRMCap));
-      this.shardsGained = Effarig.shardsGained * (simulatedRealityCount(false) + 1);
+      this.shardsGained.copyFrom(Effarig.shardsGained.times(simulatedRealityCount(false) + 1));
       this.willAutoPurge = player.reality.autoAutoClean;
       if (this.firstReality) return;
       for (let i = 0; i < this.glyphs.length; ++i) {

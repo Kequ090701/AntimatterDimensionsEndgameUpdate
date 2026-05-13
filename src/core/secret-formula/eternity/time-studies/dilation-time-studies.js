@@ -43,12 +43,17 @@ export const dilationTimeStudies = [
   },
   {
     id: 6,
-    description: () => (Pelle.isDoomed
-      ? "You cannot escape a Doomed Reality"
-      : "Unlock Reality"),
+    description: () => {
+      if (Pelle.isDoomed) {
+        if (player.celestials.pelle.galaxyGenerator.unlocked) return "*";
+        return "You cannot escape a Doomed Reality";
+      }
+      if (!Pelle.isDoomed) return "Unlock Reality";
+    },
+    scrambleText: ["You cannot escape a Doomed Reality", "Escape the Doomed Reality (Requires e9e15 Antimatter)"],
     cost: 1,
     requirement: () => TimeStudy.timeDimension(8).isBought &&
-      player.records.thisReality.maxEP.exponent >= 4000 &&
+      player.records.thisReality.maxEP.log10().gte(4000) &&
       (Perk.firstPerk.isBought || Achievements.preReality.every(a => a.isUnlocked)) &&
       !Pelle.isDoomed
   }

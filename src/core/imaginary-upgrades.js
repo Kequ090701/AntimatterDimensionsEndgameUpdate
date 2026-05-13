@@ -1,5 +1,4 @@
 import { BitPurchasableMechanicState, RebuyableMechanicState } from "./game-mechanics";
-import { DC } from "./constants";
 
 class ImaginaryUpgradeState extends BitPurchasableMechanicState {
   constructor(config) {
@@ -60,7 +59,7 @@ class ImaginaryUpgradeState extends BitPurchasableMechanicState {
   // Note we don't actually show the modal if we already failed or unlocked it
   tryShowWarningModal(specialLockText) {
     if (this.isPossible && !this.isAvailableForPurchase) {
-      Modal.upgradeLock.show({ upgrade: this, isImaginary: true, specialLockText });
+      Modal.upgradeLock.show({ upgrade: this, isImaginary: true, isEndgame: false, specialLockText });
     }
   }
 
@@ -77,7 +76,11 @@ class ImaginaryUpgradeState extends BitPurchasableMechanicState {
   }
 
   get pelleDisabled() {
-    return Pelle.isDoomed && this.config.isDisabledInDoomed;
+    return Pelle.isDoomed && this.isDisabledInDoomed;
+  }
+
+  get isDisabledInDoomed() {
+    return this.config.isDisabledInDoomed ? this.config.isDisabledInDoomed() : false;
   }
 
   tryUnlock() {
@@ -103,11 +106,14 @@ class ImaginaryUpgradeState extends BitPurchasableMechanicState {
     }
     if (this.id === 22) {
       for (const key of Object.keys(player.reality.glyphs.sac)) {
-        player.reality.glyphs.sac[key] = ImaginaryUpgrade(22).effectValue;
+        player.reality.glyphs.sac[key] = player.reality.glyphs.sac[key].add(ImaginaryUpgrade(22).effectValue);
       }
     }
     if (this.id === 25) {
       TabNotification.pelleUnlock.tryTrigger();
+    }
+    if (this.id === 30) {
+      TabNotification.alphaUnlock.tryTrigger();
     }
   }
 }
@@ -126,7 +132,11 @@ class RebuyableImaginaryUpgradeState extends RebuyableMechanicState {
   }
 
   get pelleDisabled() {
-    return Pelle.isDoomed;
+    return Pelle.isDoomed && this.isDisabledInDoomed;
+  }
+
+  get isDisabledInDoomed() {
+    return this.config.isDisabledInDoomed ? this.config.isDisabledInDoomed() : false;
   }
 
   set boughtAmount(value) {
@@ -161,6 +171,6 @@ export const ImaginaryUpgrades = {
     return this.all.countWhere(u => u.isBought);
   },
   get allBought() {
-    return (player.reality.imaginaryUpgradeBits >> 6) + 1 === 1 << (GameDatabase.reality.imaginaryUpgrades.length - 5);
+    return (player.reality.imaginaryUpgradeBits >> 7) + 1 === 1 << (GameDatabase.reality.imaginaryUpgrades.length - 5);
   }
 };

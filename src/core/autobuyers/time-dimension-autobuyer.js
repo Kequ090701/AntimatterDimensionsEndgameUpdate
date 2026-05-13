@@ -22,7 +22,7 @@ export class TimeDimensionAutobuyerState extends IntervaledAutobuyerState {
   }
 
   get isUnlocked() {
-    return RealityUpgrade(13).isBought && (!Pelle.isDoomed || PelleUpgrade.TDAutobuyers.canBeApplied);
+    return RealityUpgrade(13).isBought && (!Pelle.isDoomed || PelleUpgrade.TDAutobuyers.canBeApplied || PelleRealityUpgrade.telemechanicalProcess.isBought);
   }
 
   get resetTickOn() {
@@ -43,7 +43,7 @@ export class TimeDimensionAutobuyerState extends IntervaledAutobuyerState {
     const tier = this.tier;
     if (!TimeDimension(tier).isAvailableForPurchase) return;
     super.tick();
-    if (Currency.eternityPoints.exponent >= 10) {
+    if (Currency.eternityPoints.value.add(1).log10().gte(10)) {
       buyMaxTimeDimension(tier, 1, true);
     } else {
       buySingleTimeDimension(tier, true);

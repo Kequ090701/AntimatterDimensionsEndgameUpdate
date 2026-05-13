@@ -1,5 +1,3 @@
-import { DC } from "../constants";
-
 import { DimensionState } from "./dimension";
 
 export function infinityDimensionCommonMultiplier() {
@@ -164,8 +162,13 @@ class InfinityDimensionState extends DimensionState {
     mult = mult.powEffectOf(AlchemyResource.infinity);
     mult = mult.pow(Ra.momentumValue);
     mult = mult.powEffectOf(PelleRifts.paradox);
+    mult = mult.powEffectOf(SingularityMilestone.dimensionPow);
+    mult = mult.powEffectOf(Ra.unlocks.allDimPowTT);
+    mult = mult.powEffectOf(Ra.unlocks.infinityDimPower);
 
-    if (player.dilation.active || PelleStrikes.dilation.hasStrike) {
+    if (ExpansionPack.pellePack.isBought) mult = mult.pow(Decimal.pow(Decimal.log10(player.records.bestEndgame.galaxies).div(100), 3).add(1));
+
+    if (player.dilation.active || (PelleStrikes.dilation.hasStrike && !PelleStrikes.dilation.isDestroyed())) {
       mult = dilatedValueOf(mult);
     }
 
@@ -175,9 +178,15 @@ class InfinityDimensionState extends DimensionState {
       mult = mult.pow(0.5);
     }
 
-    if (PelleStrikes.powerGalaxies.hasStrike) {
+    if (PelleStrikes.powerGalaxies.hasStrike && !PelleStrikes.powerGalaxies.isDestroyed()) {
       mult = mult.pow(0.5);
     }
+
+    mult = mult.powEffectsOf(
+      BreakEternityUpgrade.infinityDimensionPow
+    );
+
+    if (mult.gte(InfinityDimensions.OVERFLOW)) mult = Decimal.pow(10, Decimal.pow(mult.log10().div(Decimal.log10(InfinityDimensions.OVERFLOW)), 1 / InfinityDimensions.compressionMagnitude).times(Decimal.log10(InfinityDimensions.OVERFLOW)));
 
     return mult;
   }
@@ -205,7 +214,7 @@ class InfinityDimensionState extends DimensionState {
   get powerMultiplier() {
     return new Decimal(this._powerMultiplier)
       .timesEffectsOf(this._tier === 8 ? GlyphSacrifice.infinity : null)
-      .pow(ImaginaryUpgrade(14).effectOrDefault(1));
+      .powEffectsOf(ImaginaryUpgrade(14), SingularityMilestone.perPurchaseDimMult);
   }
 
   get purchases() {
@@ -328,6 +337,15 @@ export const InfinityDimensions = {
    */
   all: InfinityDimension.index.compact(),
   HARDCAP_PURCHASES: 2000000,
+  get OVERFLOW() {
+    return DC.E1E15.powEffectsOf(EndgameMastery(92));
+  },
+
+  get compressionMagnitude() {
+    const extraReduction = ExpansionPack.enslavedPack.isBought ? Math.pow(1 / Math.log10(Tesseracts.effectiveCount + 1), 0.2) : 1;
+    const reduction = Effects.product(EndgameMastery(82), EndgameUpgrade(2)) * extraReduction;
+    return 10 * reduction;
+  },
 
   unlockNext() {
     if (InfinityDimension(8).isUnlocked) return;
@@ -373,7 +391,7 @@ export const InfinityDimensions = {
 
   tick(diff) {
     for (let tier = 8; tier > 1; tier--) {
-      InfinityDimension(tier).produceDimensions(InfinityDimension(tier - 1), diff / 10);
+      InfinityDimension(tier).produceDimensions(InfinityDimension(tier - 1), new Decimal(diff).div(10));
     }
 
     if (EternityChallenge(7).isRunning) {
@@ -412,6 +430,10 @@ export const InfinityDimensions = {
 
   get powerConversionRate() {
     const multiplier = PelleRifts.paradox.milestones[2].effectOrDefault(1);
-    return (7 + getAdjustedGlyphEffect("infinityrate") + PelleUpgrade.infConversion.effectOrDefault(0)) * multiplier;
+    const multiplier2 = Effects.product(
+      BreakEternityUpgrade.infinityPowerConversion
+    );
+    const exponent = Effects.product(EndgameMastery(102), Ra.unlocks.spaceTheoremIPowConversion);
+    return Math.pow((7 + getAdjustedGlyphEffect("infinityrate") + PelleUpgrade.infConversion.effectOrDefault(0)) * multiplier * multiplier2, exponent);
   }
 };

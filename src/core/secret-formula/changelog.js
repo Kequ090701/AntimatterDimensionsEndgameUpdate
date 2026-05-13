@@ -9,6 +9,320 @@ export const changelog = [
    * }
    */
   {
+    date: [2026, 1, 27],
+    name: "v0.3.1: The Ethereal Rebalance",
+    info: `
+Well this didn't take long.
+<br>
+<br>
+<b><i>Next update is the big one...</i></b>
+<br>
+<br>
+<b>Things added:</b><br>
+<ul>
+<li>The Ethereal</li>
+<li>The break_eternity.js framework</li>
+<li>New Notations</li>
+<li>A reward to Achievement 198</li>
+<li>Bulk Ascension Autobuyers</li>
+<li>Metaclicks</li>
+</ul>
+<br>
+<b>Things changed:</b><br>
+<ul>
+<li>Endgame Milestone requirements</li>
+<li>Added a softcap to Endgame Emolument</li>
+<li>Added a softcap to Endgame Milestone 10000</li>
+<li>Bulk Dilation Upgrades always tick</li>
+<li>Small time formatting</li>
+</ul>
+<br>
+<b>Bugs fixed:</b><br>
+<ul>
+<li>General overflow</li>
+<li>Negative Antimatter</li>
+<li>Decimalized a bunch of stuff</li>
+<li>Fixed costs</li>
+<li>Made expensive stuff not consume all your resource</li>
+<li>Fixed Teresa's Canister eating all the Reality Machines</li>
+<li>Values above e9e15 no longer reset to e9e15 on game refresh</li>
+<li>Fixed Autobuyers</li>
+<li>Perk Upgrades not resetting properly</li>
+<li>Fixed Charged IUs</li>
+<li>Made ping no longer inflate to extreme values such as LLL10 and P3</li>
+<li>Fixed Bulk Singularity Theshold Autobuyer not ticking at the beginning of Endgames</li>
+<li>Fixed Doomed Particle rounding errors</li>
+<li>Fixed Endgame Autobuyer</li>
+<li>Fixed Glyph effects in Pelle not stacking</li>
+<li>A lot moer tpyos</li>
+</ul>
+<br>
+`
+  },
+  {
+    date: [2026, 1, 9],
+    name: "v0.3.0: The Greater Reimagining II",
+    info: `
+Happy New Year!
+<br>
+<br>
+<b><i>Think we got all the bugs this time.</i></b>
+<br>
+<br>
+<b>Things added:</b><br>
+<ul>
+<li>Endgame Upgrades</li>
+<li>Galactic Powers</li>
+<li>Expansion Packs (for real this time)</li>
+<li>New Dark Matter Dimensions: 5th, 6th, 7th, 8th (9th? 10th?? 11th???)</li>
+<li>Decimalization of Relic Shards</li>
+<li>Decimalization of Galaxies</li>
+<li>Decimalization of Glyph Sacrifice</li>
+<li>Decimalization of Imaginary Machines</li>
+<li>Decimalization of Singularities, Dark Energy and other Lai features</li>
+<li>Hadronization</li>
+<li>Bosonic Lab</li>
+<li>Infinite Tesseract Formula</li>
+<li>A ton of Autobuyers</li>
+<li>Every single Pelle Destruction Upgrade</li>
+<li>A few hardcaps</li>
+<li>Cool visual effects</li>
+<li>A fourth Glyph Instability threshold</li>
+<li>A new Glyph Rarity if you get far enough</li>
+<li>Achievements 195-198</li>
+<li>Game overhaul</li>
+<li>New Celestial quotes</li>
+<li>Break Eternity Upgrade names</li>
+<li>Automator commands</li>
+<li>Made Exporting your save give rewards</li>
+</ul>
+<br>
+<b>Things removed:</b><br>
+<ul>
+<li>Reactivity</li>
+<li>Bosonic Lab</li>
+<li>My sleep schedule</li>
+</ul>
+<br>
+<b>Bugs fixed:</b><br>
+<ul>
+<li>Far too many overflow values</li>
+<li>Added a resetting of Alchemy to prevent locking out of Imaginary Upgrade 28</li>
+<li>Decimalized a few trivials to prevent crash</li>
+<li>Dooming your Reality being useless in the late-game</li>
+<li>Zero Endgame Time</li>
+<li>Formatting overflows</li>
+<li>Aliens trying to invade the game</li>
+<li>Antimatter exponent formulas not interacting with each other properly</li>
+<li>Pelle Destruction Upgrades not working</li>
+<li>Being able to disable Strikes before all the other upgrades are bought</li>
+<li>Random game crashing</li>
+<li>Severla moer radnom tpyos</li>
+</ul>
+<br>
+`
+  },
+  {
+    date: [2025, 11, 8],
+    name: "v0.2.3: The Greater Reimagining I",
+    info: `
+The long-delayed update is finally out.
+<br>
+<br>
+<b><i>If nothing else got you hooked on the game, this should.</i></b>
+<br>
+<br>
+<b>Things added:</b><br>
+<ul>
+<li>An Endgame Mastery Tree</li>
+<li>12 Endgame Milestones</li>
+<li>10 new Singularity Milestones</li>
+<li>Expansion Packs (still NYI mostly)</li>
+<li>Decimalization of Game Speed</li>
+<li>Decimalization of Dimension Boosts</li>
+<li>Decimalization of a few other things</li>
+<li>Infinite Tesseract Formula</li>
+<li>A new Galaxy Generator Upgrade</li>
+<li>Many helper functions</li>
+<li>A Celestial Matter Softcap</li>
+<li>Rebirths</li>
+</ul>
+<br>
+<b>Things removed:</b><br>
+<ul>
+<li>The Game Speed Hardcap</li>
+<li>Dimboost Overflow</li>
+<li>All semblance of balancing</li>
+<li>Rebirths</li>
+</ul>
+<br>
+<b>Bugs fixed:</b><br>
+<ul>
+<li>Fixed Dimension Boost costs above e16 or so</li>
+<li>Remnant overflow</li>
+<li>Game Time overflow</li>
+<li>Dooming your Reality not being cool enough</li>
+<li>Reality Autobuyer settings</li>
+<li>Starting Remnants being too high</li>
+<li>Cel Point gain being too high</li>
+<li>The dev being too high</li>
+<li>Made the 9th Dimension work properly</li>
+<li>Compression Magnitudes not behaving properly</li>
+<li>Severla radnom tpyos</li>
+</ul>
+<br>
+`
+  },
+  {
+    date: [2025, 9, 16],
+    name: "v0.2.2: The Great Insect Purge",
+    info: `
+We don't fix bugs, we purge them.
+<br>
+<br>
+<b><i>This should cover most of the broken stuff.</i></b>
+<br>
+<br>
+<b>Things added:</b><br>
+<ul>
+<li>A compression magnitude function that can be weakened eventually</li>
+<li>A cap onto an Eternity Upgrade</li>
+</ul>
+<br>
+<b>Bugs fixed:</b><br>
+<ul>
+<li>Fixing overflow in Time Dimension and related cost sets with autobuyers</li>
+<li>Fixing Tachyon Particle overflow</li>
+<li>Locking off Galaxy Generator until you Dilate in Pelle</li>
+<li>Fixing Celestial Point formula after Achievement r197</li>
+<li>Break Eternity now requires 1e9e15 Antimatter as well finally</li>
+</ul>
+<br>
+`
+  },
+  {
+    date: [2025, 9, 10],
+    name: "v0.2.1: THE GRAND ENDGAME RELEASE",
+    info: `
+It's finally over.
+<br>
+<br>
+<b><i>I hope you enjoy playing Antimatter Dimensions: Endgame!</i></b>
+<br>
+<br>
+<b>Things added:</b><br>
+<ul>
+<li>THE ENDGAME PRESTIGE LAYER</li>
+<li>Row 19 Achievement Effects</li>
+<li>A ton of quotes</li>
+<li>A new set of Dimensions</li>
+<li>Pelle Destruction Upgrades</li>
+<li>Break Eternity and its respective upgrades</li>
+<li>A new Celestial icon in Celestial Navigation...?</li>
+<li>A bunch of unnecessary statistics</li>
+</ul>
+<br>
+<b>Things changed:</b><br>
+<ul>
+<li>Nerfed the first repeatable Pelle Upgrade slightly to prevent inflation</li>
+<li>Adjusting the progress bar for effect</li>
+<li>The Reality study now displays a special message when you unlock the Galaxy Generator!</li>
+<li>Nerfed the Galaxy Generator to High Heaven because it was too OP</li>
+</ul>
+<br>
+`
+  },
+  {
+    date: [2025, 8, 20],
+    name: "v0.2.0: Final Update before Endgame",
+    info: `
+The End(game) is near. Prepare yourselves.
+<br>
+<br>
+<b><i>I expect Endgame to be out by the end of the month. If not, definitely by early September.</i></b>
+<br>
+<br>
+<b>Things added:</b><br>
+<ul>
+<li>A 6th Row of Imaginary Upgrades (albeit NYI until next update)</li>
+<li>NEWS DUMP (40+ new messages plus a story or two)</li>
+<li>The official 19th Achievement Row</li>
+<li>Obscuration to the 19th Row until 1st Endgame (will take effect next update)</li>
+<li>A crapton of new News Ticker settings so you can customize your messages just how you like!</li>
+</ul>
+<br>
+<b>Things changed:</b><br>
+<ul>
+<li>A few headers in the Credits screen (they look smoother now)</li>
+<li>Buffed Achievement r76 to compensate for the prior change</li>
+<li>Changed the game's display name and logo (your page title should now display AD: Endgame!)</li>
+<li>Looped Achievement bits to allow for further expansion</li>
+<li>Achievement r35 now only needs 2 hours of offline progress instead of 6</li>
+</ul>
+<br>
+<b>Bugs fixed:</b><br>
+<ul>
+<li>Fixed several tpyos (mostly with Achivements)</li>
+<li>Fixed the credits screen on multiple browsers (others may be a bit fast)</li>
+<li>Finally fixed the bug with TS191's second effect not working</li>
+</ul>
+<br>
+`
+  },
+  {
+    date: [2025, 4, 22],
+    name: "v0.2 Beta 1: Preparing for break_eternity.js",
+    info: `
+We have reformatted the update tags. Incomplete versions are now displayed as beta (v0.2-beta-1 for example)
+and alpha versions have normal tag displays (like v0.2.0).
+<br>
+<br>
+<b><i>Thanks again for playing!</i></b>
+<br>
+<br>
+<b>Things added:</b><br>
+<ul>
+<li>16 new news ticker messages</li>
+<li>The Endgame confirmation modal</li>
+<li>A reward to Achievement r102 (double Eternity gain)</li>
+<li>A ton of links in the infobox</li>
+<li>The final set of Pelle quotes before Endgame</li>
+</ul>
+<br>
+<b>Things changed:</b><br>
+<ul>
+<li>The requirement for Achievement r76 has been reduced from 8 days to 8 hours</li>
+<li>The second link to the news message "this link is not a rickroll" (the old video no longer existed)</li>
+<li>Buffed the Glyph Rarity boost from Relic Shards significantly</li>
+<li>Cropped the logo screen so you can see the whole thing now</li>
+<li>Scour to Empower only needs 10 Glyphs now instead of 30</li>
+</ul>
+<br>
+<b>Bugs fixed:</b><br>
+<ul>
+<li>Achievement r183 displayed the old value for its reward</li>
+<li>Infinity/Break Upgrades displayed the wrong multiplier when TS31 was purchased (still had ^4 values
+instead of ^100)</li>
+<li>The multiplier tab shows r81 finally</li>
+</ul>
+<br>
+<b>Time Studies buffed:</b><br>
+<ul>
+<li>TS21: Formula improved (exponent 0.032 -> 0.04)</li>
+<li>TS32: Effect multiplied by 10</li>
+<li>TS111: IP formula log(x)/285 -> log(x)/280</li>
+<li>TS151: Effect multiplied by 100</li>
+<li>TS193: Cap changed (1e13000 -> 1e30000) and overall effectiveness multiplied by 1.5</li>
+<li>TS212: Effect multiplied by 1.6</li>
+<li>TS214: Cap changed (e164000 -> e1e6) and formula changed to compensate</li>
+<li>TS226: Effect multiplied by 1.25</li>
+<li>TS232: Formula improved (base doubled, exponent multiplied by 1.25)</li>
+<li>TS233: Effect multiplied by about 1.39</li>
+</ul>
+<br>
+`
+  },
+  {
     date: [2025, 3, 6],
     name: "v0.1 Beta 3: Breaking Down the Timewalls",
     info: `

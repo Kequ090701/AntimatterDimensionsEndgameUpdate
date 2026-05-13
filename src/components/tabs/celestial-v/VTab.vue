@@ -4,12 +4,14 @@ import GlyphSetPreview from "@/components/GlyphSetPreview";
 import PrimaryButton from "@/components/PrimaryButton";
 import { V_REDUCTION_MODE } from "@/core/secret-formula";
 import VUnlockRequirement from "./VUnlockRequirement";
+import VUpgradeButton from "./VUpgradeButton";
 
 export default {
   name: "VTab",
   components: {
     CelestialQuoteHistory,
     VUnlockRequirement,
+    VUpgradeButton,
     PrimaryButton,
     GlyphSetPreview
   },
@@ -26,6 +28,7 @@ export default {
       wantsFlipped: true,
       isRunning: false,
       hasAlchemy: false,
+      hasUpgrades: false,
     };
   },
   computed: {
@@ -78,6 +81,11 @@ export default {
         ],
       ];
     },
+    upgrades() {
+      return [
+        VUpgrade.auto,
+      ];
+    },
     runButtonClassObject() {
       return {
         "l-v-hexagon": true,
@@ -99,12 +107,13 @@ export default {
       this.totalUnlocks = V.spaceTheorems;
       this.pp = Currency.perkPoints.value;
       this.showReduction = VUnlocks.shardReduction.isUnlocked;
-      this.runRecords = Array.from(player.celestials.v.runRecords);
+      this.runRecords = cloneDeep(player.celestials.v.runRecords);
       this.runGlyphs = player.celestials.v.runGlyphs.map(gList => Glyphs.copyForRecords(gList));
       this.isFlipped = V.isFlipped;
       this.wantsFlipped = player.celestials.v.wantsFlipped;
       this.isRunning = V.isRunning;
       this.hasAlchemy = Ra.unlocks.unlockGlyphAlchemy.canBeApplied;
+      this.hasUpgrades = ExpansionPack.vPack.isBought;
     },
     unlockCelestial() {
       if (V.canUnlockCelestial) V.unlockCelestial();
@@ -125,7 +134,7 @@ export default {
         : format(Decimal.pow10(hex.reduction));
     },
     showRecord(hex) {
-      return this.runRecords[hex.id] > 0 || hex.completions > 0;
+      return new Decimal(this.runRecords[hex.id]).gt(0) || hex.completions > 0;
     },
     reduceGoals(hex) {
       if (!Currency.perkPoints.purchase(hex.reductionCost)) return;
@@ -154,7 +163,7 @@ export default {
     },
     createCursedGlyph() {
       Glyphs.giveCursedGlyph();
-    }
+    },
   }
 };
 </script>
@@ -217,6 +226,14 @@ export default {
         class="c-v-info-text"
       >
         You have {{ quantify("Perk Point", pp, 2, 0) }}.
+      </div>
+      <div class="l-v-upgrades-grid">
+        <VUpgradeButton
+          v-if="hasUpgrades"
+          v-for="upgrade in upgrades"
+          :key="upgrade.id"
+          :upgrade="upgrade"
+        />
       </div>
       <div class="l-v-unlocks-container">
         <li
@@ -322,7 +339,7 @@ export default {
             :class="{'o-v-milestone--unlocked':
               has(milestone)}"
           >
-            <div :class="{ 'o-pelle-disabled': isDoomed }">
+            <div :class="{ 'o-pelle-disabled': isDoomed && milestone.pelleDisabled }">
               <p>{{ milestone.description }}</p>
               <p>Reward: {{ milestone.rewardText }}</p>
               <p v-if="milestone.formattedEffect">

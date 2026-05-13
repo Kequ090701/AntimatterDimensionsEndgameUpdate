@@ -68,8 +68,9 @@ Decimal.prototype.copyFrom = function(decimal) {
   if (!(decimal instanceof Decimal) && !(decimal instanceof DecimalCurrency)) {
     throw "Copy value is not Decimal or DecimalCurrency";
   }
-  this.mantissa = decimal.mantissa;
-  this.exponent = decimal.exponent;
+  this.sign = decimal.sign;
+  this.mag = decimal.mag;
+  this.layer = decimal.layer;
 };
 
 window.copyToClipboard = (function() {
@@ -181,6 +182,14 @@ Array.prototype.sum = function() {
 /**
  * @returns {number}
  */
+Array.prototype.decimalSum = function() {
+  if (this.length === 0) return new Decimal(0);
+  return this.reduce(Decimal.sumReducer);
+};
+
+/**
+ * @returns {number}
+ */
 Array.prototype.max = function() {
   if (this.length === 0) return 0;
   return this.reduce((a, b) => Math.max(a, b));
@@ -210,7 +219,7 @@ Array.prototype.countWhere = function(predicate) {
  * @returns {Decimal}
  */
 Decimal.prototype.clampMaxExponent = function(maxExp) {
-  return this.exponent >= maxExp
+  return this.max(1).log10().gte(maxExp)
     ? Decimal.fromMantissaExponent_noNormalize(1, maxExp) : this;
 };
 

@@ -1,4 +1,3 @@
-import { DC } from "./constants";
 import { deepmergeAll } from "@/utility/deepmerge";
 import { GameMechanicState } from "./game-mechanics";
 
@@ -10,7 +9,7 @@ export function startEternityChallenge() {
   Replicanti.reset();
   resetChallengeStuff();
   AntimatterDimensions.reset();
-  player.replicanti.galaxies = 0;
+  player.replicanti.galaxies = DC.D0;
   Currency.infinityPoints.reset();
   InfinityDimensions.resetAmount();
   player.records.bestInfinity.bestIPminEternity = DC.D0;
@@ -129,14 +128,14 @@ export class EternityChallengeState extends GameMechanicState {
   }
 
   get initialGoal() {
-    if (Pelle.isDoomed && this.config.pelleGoal) {
+    if (Pelle.isDoomed && this.config.pelleGoal && this.config.hasPelleGoal()) {
       return this.config.pelleGoal;
     }
     return this.config.goal;
   }
 
   get goalIncrease() {
-    if (Pelle.isDoomed && this.config.pelleGoalIncrease) {
+    if (Pelle.isDoomed && this.config.pelleGoalIncrease && this.config.hasPelleGoal()) {
       return this.config.pelleGoalIncrease;
     }
     return this.config.goalIncrease;
@@ -162,8 +161,8 @@ export class EternityChallengeState extends GameMechanicState {
 
   completionsAtIP(ip) {
     if (ip.lt(this.initialGoal)) return 0;
-    const completions = 1 + (ip.dividedBy(this.initialGoal)).log10() / this.goalIncrease.log10();
-    return Math.min(Math.floor(completions), this.maxCompletions);
+    const completions = (ip.dividedBy(this.initialGoal)).log10().div(this.goalIncrease.log10()).add(1);
+    return Decimal.min(Decimal.floor(completions), this.maxCompletions).toNumber();
   }
 
   addCompletion(auto = false) {
@@ -209,7 +208,7 @@ export class EternityChallengeState extends GameMechanicState {
     if (Player.canEternity) eternity(false, auto, { enteringEC: true });
     player.challenge.eternity.current = this.id;
     if (this.id === 12) {
-      if (enteringGamespeed < 0.001) SecretAchievement(42).unlock();
+      if (enteringGamespeed.lt(0.001)) SecretAchievement(42).unlock();
       player.requirementChecks.reality.slowestBH = 1;
     }
     if (Enslaved.isRunning) {
@@ -331,11 +330,11 @@ export const EternityChallenges = {
       const hasUpgradeLock = RealityUpgrade(12).isLockingMechanics ||
         (ImaginaryUpgrade(15).isLockingMechanics && shouldPreventEC7 &&
           !Array.range(1, 6).some(ec => !EternityChallenge(ec).isFullyCompleted));
-      if (!player.reality.autoEC || Pelle.isDisabled("autoec") || hasUpgradeLock) {
+      if (!player.reality.autoEC || (Pelle.isDisabled("autoec") && !PellePerkUpgrade.perkPEC1.isBought) || hasUpgradeLock) {
         player.reality.lastAutoEC = Math.clampMax(player.reality.lastAutoEC, this.interval);
         return;
       }
-      if (Ra.unlocks.instantECAndRealityUpgradeAutobuyers.canBeApplied) {
+      if (Ra.unlocks.instantECAndRealityUpgradeAutobuyers.canBeApplied || EndgameMastery(53).isBought) {
         let next = this.nextChallenge;
         while (next !== undefined) {
           while (!next.isFullyCompleted) {
@@ -361,15 +360,21 @@ export const EternityChallenges = {
     },
 
     get interval() {
-      if (!Perk.autocompleteEC1.canBeApplied) return Infinity;
-      let minutes = Effects.min(
-        Number.MAX_VALUE,
+      if (!Perk.autocompleteEC1.canBeApplied && !EndgameMastery(22).isBought) return Infinity;
+      let startingmin = 1e300;
+      if (EndgameMastery(22).isBought) startingmin = 60;
+      let minutes = new Decimal(Effects.min(
+        startingmin,
         Perk.autocompleteEC1,
         Perk.autocompleteEC2,
         Perk.autocompleteEC3
-      );
-      minutes /= VUnlocks.fastAutoEC.effectOrDefault(1);
-      return TimeSpan.fromMinutes(minutes).totalMilliseconds;
+      ));
+      minutes = minutes.div(EndgameMastery(22).effectOrDefault(1));
+      minutes = minutes.div(VUnlocks.fastAutoEC.effectOrDefault(1));
+      if (Pelle.isDoomed && PelleCelestialUpgrade.vMilestones2.isBought && VUnlocks.fastAutoEC.effectValue.gt(1)) {
+        minutes = minutes.div(VUnlocks.fastAutoEC.effectValue);
+      }
+      return TimeSpan.fromMinutes(minutes).totalMilliseconds.toNumber();
     }
   }
 };

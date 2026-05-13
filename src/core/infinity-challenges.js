@@ -1,7 +1,7 @@
 import { GameMechanicState } from "./game-mechanics";
 
 export function tryCompleteInfinityChallenges() {
-  if (EternityMilestone.autoIC.isReached) {
+  if (EternityMilestone.autoIC.isReached || PelleDestructionUpgrade.autoICComp.isBought) {
     const toComplete = InfinityChallenges.all.filter(x => x.isUnlocked && !x.isCompleted);
     for (const challenge of toComplete) challenge.complete();
   }
@@ -88,7 +88,7 @@ class InfinityChallengeState extends GameMechanicState {
 
   updateChallengeTime() {
     const bestTimes = player.challenge.infinity.bestTimes;
-    if (bestTimes[this.id - 1] <= player.records.thisInfinity.time) {
+    if (bestTimes[this.id - 1].lte(player.records.thisInfinity.time)) {
       return;
     }
     player.challenge.infinity.bestTimes[this.id - 1] = player.records.thisInfinity.time;

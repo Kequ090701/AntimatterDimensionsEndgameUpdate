@@ -11,9 +11,11 @@ export default {
   data() {
     return {
       isUnlocked: false,
-      galaxies: 0,
-      generatedGalaxies: 0,
-      galaxiesPerSecond: 0,
+      isDilated: false,
+      isFinalized: false,
+      galaxies: new Decimal(0),
+      generatedGalaxies: new Decimal(0),
+      galaxiesPerSecond: new Decimal(0),
       cap: 0,
       isCapped: false,
       capRift: null,
@@ -21,6 +23,15 @@ export default {
       isCollapsed: false,
       barWidth: 0,
       capRiftName: "",
+      galGenInstability: 0,
+      harshGalGenInstability: 0,
+      effectiveInstability: new Decimal(0),
+      instabilityStart: 0,
+      harshInstabilityStart: 0,
+      generationReduction: new Decimal(0),
+      trueGenerationReduction: new Decimal(0),
+      isInstabilityShown: false,
+      isSecondInstabilityShown: false,
     };
   },
   computed: {
@@ -30,34 +41,46 @@ export default {
         : "fas fa-compress-arrows-alt";
     },
     upgrades() {
+      if (!EndgameMilestone.fasterGalaxies.isReached) return GalaxyGeneratorUpgrades.all.filter(u => u.id !== "galaxyGeneratorRSMult");
       return GalaxyGeneratorUpgrades.all;
     },
     galaxyText() {
-      let text = format(Math.max(this.galaxies, 0), 2);
-      if (this.galaxies < 0) text += ` [${format(this.galaxies, 2)}]`;
+      let text = format(Decimal.max(this.galaxies, 0), 2);
+      if (this.galaxies.lt(0)) text += ` [${format(this.galaxies, 2)}]`;
       return text;
     },
     sacrificeText() {
       return this.capRift.galaxyGeneratorText.replace("$value", this.capRiftName);
     },
     emphasisedStart() {
-      return Math.pow(this.generatedGalaxies / this.cap, 0.45);
+      return Decimal.pow(this.generatedGalaxies.div(this.cap), 0.45).toNumber();
     }
   },
   methods: {
     update() {
       this.isUnlocked = Pelle.hasGalaxyGenerator;
+      this.isDilated = player.dilation.active;
+      this.isFinalized = PelleStrikes.dilation.isDestroyed();
       this.isCapped = GalaxyGenerator.isCapped;
       this.isCollapsed = player.celestials.pelle.collapsed.galaxies && !this.isCapped;
       if (this.isCollapsed || !this.isUnlocked) return;
-      this.galaxies = player.galaxies + GalaxyGenerator.galaxies;
-      this.generatedGalaxies = GalaxyGenerator.generatedGalaxies;
-      this.galaxiesPerSecond = GalaxyGenerator.gainPerSecond;
+      this.galaxies.copyFrom(player.galaxies.add(GalaxyGenerator.galaxies));
+      this.generatedGalaxies.copyFrom(GalaxyGenerator.generatedGalaxies);
+      this.galaxiesPerSecond.copyFrom(GalaxyGenerator.gainPerSecond);
       this.cap = GalaxyGenerator.generationCap;
       this.capRift = GalaxyGenerator.capRift;
       this.sacrificeActive = GalaxyGenerator.sacrificeActive;
       this.barWidth = (this.isCapped ? this.capRift.reducedTo : this.emphasisedStart);
       if (this.capRift) this.capRiftName = wordShift.wordCycle(this.capRift.name);
+      this.galGenInstability = GalaxyGenerator.galGenInstability;
+      this.harshGalGenInstability = GalaxyGenerator.harshGalGenInstability;
+      this.effectiveInstability.copyFrom(Decimal.pow(this.galGenInstability, this.harshGalGenInstability));
+      this.instabilityStart = GalaxyGenerator.instabilityStart;
+      this.harshInstabilityStart = GalaxyGenerator.harshInstabilityStart;
+      this.generationReduction.copyFrom(Decimal.max(1, Decimal.pow(this.galGenInstability, Decimal.log10(Decimal.max(Decimal.pow(this.galaxies.div(this.instabilityStart), 0.75), 1)))));
+      this.trueGenerationReduction.copyFrom(Decimal.max(1, Decimal.pow(Decimal.pow(this.galGenInstability, this.harshGalGenInstability), Decimal.log10(Decimal.max(Decimal.pow(this.galaxies.div(this.instabilityStart), 0.75), 1)))));
+      this.isInstabilityShown = PlayerProgress.endgameUnlocked() || this.galaxies.gte(this.instabilityStart);
+      this.isSecondInstabilityShown = this.galaxies.gte(this.harshInstabilityStart);
     },
     increaseCap() {
       if (GalaxyGenerator.isCapped) GalaxyGenerator.startSacrifice();
@@ -68,6 +91,7 @@ export default {
     unlock() {
       player.celestials.pelle.galaxyGenerator.unlocked = true;
       Pelle.quotes.galaxyGeneratorUnlock.show();
+      if (player.endgames >= 1) Pelle.quotes.galgen2.show();
     }
   },
 };
@@ -94,6 +118,28 @@ export default {
           <span class="c-galaxies-amount">{{ galaxyText }}</span>
           Galaxies.
           <span class="c-galaxies-amount">+{{ format(galaxiesPerSecond, 2, 1) }}/s</span>
+          <div v-if="isInstabilityShown">
+            Your Galaxy Generator Instability Magnitude is
+            <span class="c-galaxies-amount">{{ format(galGenInstability, 2, 1) }}</span>,
+            which is dividing Galaxies above {{ format(instabilityStart, 2, 1) }} by
+            <span class="c-galaxies-amount">{{ format(generationReduction, 2, 1) }}</span>.
+          </div>
+          <br>
+          <div v-if="isSecondInstabilityShown">
+            <span class="c-danger-text">
+              Your Galaxy Generator has produced too many Galaxies, and is starting to break down.
+              This started at {{ format(harshInstabilityStart, 2, 1) }} Galaxies.
+              <br>
+              This effect is currently raising your Galaxy Generator Instability Magnitude by
+              <span class="c-galaxies-amount">{{ formatPow(harshGalGenInstability, 2, 3) }}</span>,
+              making it effectively equal to
+              <span class="c-galaxies-amount">{{ format(effectiveInstability, 2, 1) }}</span>.
+              <br>
+              Therefore, whereas your Galaxy production would normally be divided by the number above,
+              it is instead being divided by
+              <span class="c-galaxies-amount">{{ format(trueGenerationReduction, 2, 1) }}</span>.
+            </span>
+          </div>
         </div>
         <div>
           <button
@@ -144,11 +190,17 @@ export default {
         </div>
       </div>
       <button
-        v-else
+        v-if="(isDilated || isFinalized) && !isUnlocked"
         class="c-generator-unlock-button"
         @click="unlock"
       >
         Unlock the Galaxy Generator
+      </button>
+      <button
+        v-if="!isDilated && !isFinalized"
+        class="c-generator-locked-button"
+      >
+        You must be inside Dilation to unlock the Galaxy Generator
       </button>
     </div>
   </div>
@@ -173,6 +225,19 @@ export default {
   font-weight: bold;
   color: black;
   background: linear-gradient(var(--color-pelle--secondary), var(--color-pelle--base));
+  border-radius: var(--var-border-radius, 0.5rem);
+  padding: 2rem;
+  cursor: pointer;
+}
+
+.c-generator-locked-button {
+  width: 25rem;
+  height: 10rem;
+  font-family: Typewriter;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: black;
+  background: #5f5f5f;
   border-radius: var(--var-border-radius, 0.5rem);
   padding: 2rem;
   cursor: pointer;
@@ -260,6 +325,12 @@ export default {
 }
 
 .s-base--dark .c-medium-text {
+  text-shadow: 0.2rem 0.2rem 0.2rem black;
+}
+
+.c-danger-text {
+  font-weight: bold;
+  color: var(--color-pelle--base);
   text-shadow: 0.2rem 0.2rem 0.2rem black;
 }
 </style>

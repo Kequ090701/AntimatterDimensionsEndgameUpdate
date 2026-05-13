@@ -77,7 +77,7 @@ export default {
       this.resourceType = player.options.statTabResources;
       this.showRate = this.resourceType === RECENT_PRESTIGE_RESOURCE.RATE;
       this.hasChallenges = this.runs.map(r => this.challengeText(r)).some(t => t);
-      this.hasIM = MachineHandler.currentIMCap > 0;
+      this.hasIM = MachineHandler.currentIMCap.gt(0);
 
       // We have 4 different "useful" stat pairings we could display, but this ends up being pretty boilerplatey
       const names = [this.points, `${this.points} Rate`, this.plural, `${this.singular} Rate`];
@@ -159,10 +159,10 @@ export default {
       return cells;
     },
     gameTime(run) {
-      return timeDisplayShort(run[0]);
+      return timeDisplayShort(new Decimal(run[0]));
     },
     realTime(run) {
-      return timeDisplayShort(run[1]);
+      return timeDisplayShort(new Decimal(run[1]));
     },
     prestigeCurrencyGain(run) {
       if (this.hasIM && this.layer.name === "Reality") return `${format(run[7], 2)} iM`;

@@ -1,5 +1,3 @@
-import { DC } from "./constants";
-
 // Slowdown parameters for replicanti growth, interval will increase by scaleFactor for every scaleLog10
 // OoM past the cap (default is 308.25 (log10 of 1.8e308), 1.2, Number.MAX_VALUE)
 export const ReplicantiGrowth = {
@@ -7,7 +5,7 @@ export const ReplicantiGrowth = {
     return Math.log10(Number.MAX_VALUE);
   },
   get scaleFactor() {
-    if (PelleStrikes.eternity.hasStrike && Replicanti.amount.gte(DC.E2000)) return 10;
+    if (PelleStrikes.eternity.hasStrike && !PelleStrikes.eternity.isDestroyed() && Replicanti.amount.gte(DC.E2000)) return 10;
     if (Pelle.isDoomed) return 2;
     return AlchemyResource.cardinality.effectValue;
   }
@@ -15,15 +13,16 @@ export const ReplicantiGrowth = {
 
 // Internal function to add RGs; called both from within the fast replicanti code and from the function
 // used externally. Only called in cases of automatic RG and does not actually modify replicanti amount
-function addReplicantiGalaxies(newGalaxies) {
-  if (newGalaxies > 0) {
-    player.replicanti.galaxies += newGalaxies;
+function addReplicantiGalaxies(newGalaxiesNum) {
+  let newGalaxies = new Decimal(newGalaxiesNum);
+  if (newGalaxies.gt(0)) {
+    player.replicanti.galaxies = player.replicanti.galaxies.add(newGalaxies);
     player.requirementChecks.eternity.noRG = false;
     const keepResources = Pelle.isDoomed
       ? PelleUpgrade.replicantiGalaxyEM40.canBeApplied
       : EternityMilestone.replicantiNoReset.isReached;
     if (!keepResources) {
-      player.dimensionBoosts = 0;
+      player.dimensionBoosts = DC.D0;
       softReset(0, true, true);
     }
   }
@@ -38,10 +37,10 @@ export function replicantiGalaxy(auto) {
   }
   if (!Replicanti.galaxies.canBuyMore) return;
   const galaxyGain = Replicanti.galaxies.gain;
-  if (galaxyGain < 1) return;
+  if (galaxyGain.lt(1)) return;
   player.replicanti.timer = 0;
-  Replicanti.amount = Achievement(126).isUnlocked && !Pelle.isDoomed
-    ? Decimal.pow10(Replicanti.amount.log10() - LOG10_MAX_VALUE * galaxyGain)
+  Replicanti.amount = Achievement(126).isUnlocked
+    ? Decimal.pow10(Replicanti.amount.add(1).log10().sub(new Decimal(LOG10_MAX_VALUE).times(galaxyGain)))
     : DC.D1;
   addReplicantiGalaxies(galaxyGain);
 }
@@ -60,11 +59,11 @@ function fastReplicantiBelow308(log10GainFactor, isAutobuyerActive) {
   const shouldBuyRG = isAutobuyerActive && !RealityUpgrade(6).isLockingMechanics;
   // More than e308 galaxies per tick causes the game to die, and I don't think it's worth the performance hit of
   // Decimalifying the entire calculation.  And yes, this can and does actually happen super-lategame.
-  const uncappedAmount = DC.E1.pow(log10GainFactor.plus(Replicanti.amount.log10()));
+  const uncappedAmount = DC.E1.pow(log10GainFactor.plus(Replicanti.amount.add(1).log10()));
   // Checking for uncapped equaling zero is because Decimal.pow returns zero for overflow for some reason
   if (log10GainFactor.gt(Number.MAX_VALUE) || uncappedAmount.eq(0)) {
     if (shouldBuyRG) {
-      addReplicantiGalaxies(Replicanti.galaxies.max - player.replicanti.galaxies);
+      addReplicantiGalaxies(Replicanti.galaxies.max.sub(player.replicanti.galaxies));
     }
     Replicanti.amount = replicantiCap();
     // Basically we've used nothing.
@@ -72,18 +71,18 @@ function fastReplicantiBelow308(log10GainFactor, isAutobuyerActive) {
   }
 
   if (!shouldBuyRG) {
-    const remainingGain = log10GainFactor.minus(replicantiCap().log10() - Replicanti.amount.log10()).clampMin(0);
+    const remainingGain = log10GainFactor.minus(replicantiCap().log10().sub(Replicanti.amount.add(1).log10())).clampMin(0);
     Replicanti.amount = Decimal.min(uncappedAmount, replicantiCap());
     return remainingGain;
   }
 
-  const gainNeededPerRG = Decimal.NUMBER_MAX_VALUE.log10();
-  const replicantiExponent = log10GainFactor.toNumber() + Replicanti.amount.log10();
-  const toBuy = Math.floor(Math.min(replicantiExponent / gainNeededPerRG,
-    Replicanti.galaxies.max - player.replicanti.galaxies));
-  const maxUsedGain = gainNeededPerRG * toBuy + replicantiCap().log10() - Replicanti.amount.log10();
+  const gainNeededPerRG = DC.NUMMAX.log10();
+  const replicantiExponent = log10GainFactor.add(Replicanti.amount.add(1).log10());
+  const toBuy = Decimal.floor(Decimal.min(new Decimal(replicantiExponent.div(gainNeededPerRG)),
+    Replicanti.galaxies.max.sub(player.replicanti.galaxies)));
+  const maxUsedGain = gainNeededPerRG.times(toBuy).add(replicantiCap().log10()).sub(Replicanti.amount.log10());
   const remainingGain = log10GainFactor.minus(maxUsedGain).clampMin(0);
-  Replicanti.amount = Decimal.pow10(replicantiExponent - gainNeededPerRG * toBuy)
+  Replicanti.amount = Decimal.pow10(replicantiExponent.sub(gainNeededPerRG.times(toBuy)))
     .clampMax(replicantiCap());
   addReplicantiGalaxies(toBuy);
   return remainingGain;
@@ -104,11 +103,11 @@ export function getReplicantiInterval(overCapOverride, intervalIn) {
   }
 
   if (overCap) {
-    let increases = (amount.log10() - replicantiCap().log10()) / ReplicantiGrowth.scaleLog10;
-    if (PelleStrikes.eternity.hasStrike && amount.gte(DC.E2000)) {
+    let increases = (amount.log10().sub(replicantiCap().log10())).div(ReplicantiGrowth.scaleLog10);
+    if (PelleStrikes.eternity.hasStrike && !PelleStrikes.eternity.isDestroyed() && amount.gte(DC.E2000)) {
       // The above code assumes in this case there's 10x scaling for every 1e308 increase;
       // in fact, before e2000 it's only 2x.
-      increases -= Math.log10(5) * (2000 - replicantiCap().log10()) / ReplicantiGrowth.scaleLog10;
+      increases = increases.sub(Decimal.log10(5).times(new Decimal(2000).sub(replicantiCap().log10())).div(ReplicantiGrowth.scaleLog10));
     }
     interval = interval.times(Decimal.pow(ReplicantiGrowth.scaleFactor, increases));
   }
@@ -120,6 +119,11 @@ export function getReplicantiInterval(overCapOverride, intervalIn) {
     // and handling it would make the replicanti code a lot more complicated.
     interval = interval.pow(2);
   }
+
+  interval = interval.powEffectsOf(
+    BreakEternityUpgrade.replicantiIntervalPow
+  );
+  
   return interval;
 }
 
@@ -134,17 +138,33 @@ export function totalReplicantiSpeedMult(overCap) {
   totalMult = totalMult.times(PelleRifts.decay.effectValue);
   totalMult = totalMult.times(Pelle.specialGlyphEffect.replication);
   totalMult = totalMult.times(ShopPurchase.replicantiPurchases.currentMult);
-  if (Pelle.isDisabled("replicantiIntervalMult")) return totalMult;
+  if (Pelle.isDisabled("replicantiIntervalMult")) {
+    let pelleRep = DC.D1;
+    if (PelleAchievementUpgrade.achievement81.isBought) pelleRep = pelleRep.times(Effects.product(Achievement(81)));
+    if (PelleDestructionUpgrade.timestudy62.isBought) pelleRep = pelleRep.times(Effects.product(TimeStudy(62)));
+    if (PelleDestructionUpgrade.timestudy213.isBought) pelleRep = pelleRep.times(Effects.product(TimeStudy(213)));
+    if (PelleRealityUpgrade.replicativeAmplifier.isBought) pelleRep = pelleRep.timesEffectOf(RealityUpgrade(2));
+    if (PelleRealityUpgrade.cosmicallyDuplicate.isBought) pelleRep = pelleRep.times(Effects.product(RealityUpgrade(6)));
+    if (PelleRealityUpgrade.replicativeRapidity.isBought) pelleRep = pelleRep.times(Effects.product(RealityUpgrade(23)));
+    if (PelleDestructionUpgrade.timestudy132.isBought) pelleRep = pelleRep.times(3);
+    if (PelleAchievementUpgrade.achievement134.isBought && !overCap) pelleRep = pelleRep.times(2);
+    if (PelleDestructionUpgrade.destroyedGlyphEffects.isBought) pelleRep = pelleRep.times(getAdjustedGlyphEffect("replicationspeed"));
+    if (PelleCelestialUpgrade.raTeresa3.isBought) pelleRep = pelleRep.times(Decimal.clampMin(Decimal.log10(Replicanti.amount.add(1)).times(getSecondaryGlyphEffect("replicationdtgain")), 1));
+    if (PelleCelestialUpgrade.raV3.isBought) pelleRep = pelleRep.timesEffectOf(Ra.unlocks.continuousTTBoost.effects.replicanti);
+    if (PelleAlchemyUpgrade.alchemyReplication.isBought) pelleRep = pelleRep.timesEffectOf(AlchemyResource.replication);
+    totalMult = totalMult.times(pelleRep);
+    return totalMult;
+  }
 
   const preCelestialEffects = Effects.product(
     Achievement(81),
     TimeStudy(62),
     TimeStudy(213),
-    RealityUpgrade(2),
     RealityUpgrade(6),
     RealityUpgrade(23),
   );
   totalMult = totalMult.times(preCelestialEffects);
+  totalMult = totalMult.timesEffectOf(RealityUpgrade(2));
   if (TimeStudy(132).isBought) {
     totalMult = totalMult.times(Perk.studyPassive.isBought ? 3 : 1.5);
   }
@@ -155,7 +175,7 @@ export function totalReplicantiSpeedMult(overCap) {
   totalMult = totalMult.times(getAdjustedGlyphEffect("replicationspeed"));
   if (GlyphAlteration.isAdded("replication")) {
     totalMult = totalMult.times(
-      Math.clampMin(Decimal.log10(Replicanti.amount) * getSecondaryGlyphEffect("replicationdtgain"), 1));
+      Decimal.clampMin(Decimal.log10(Replicanti.amount.add(1)).times(getSecondaryGlyphEffect("replicationdtgain")), 1));
   }
   totalMult = totalMult.timesEffectsOf(AlchemyResource.replication, Ra.unlocks.continuousTTBoost.effects.replicanti);
 
@@ -163,12 +183,12 @@ export function totalReplicantiSpeedMult(overCap) {
 }
 
 export function replicantiCap() {
-  return EffarigUnlock.infinity.canBeApplied
+  return EffarigUnlock.infinity.canBeApplied || (Pelle.isDoomed && PelleCelestialUpgrade.replicantiCapIncrease.isBought)
     ? Currency.infinitiesTotal.value
       .pow(TimeStudy(31).isBought ? 120 : 30)
       .clampMin(1)
-      .times(Decimal.NUMBER_MAX_VALUE)
-    : Decimal.NUMBER_MAX_VALUE;
+      .times(DC.NUMMAX)
+    : DC.NUMMAX;
 }
 
 // eslint-disable-next-line complexity
@@ -184,7 +204,7 @@ export function replicantiLoop(diff) {
 
   // Figure out how many ticks to calculate for and roll over any leftover time to the next tick. The rollover
   // calculation is skipped if there's more than 100 replicanti ticks per game tick to reduce round-off problems.
-  let tickCount = Decimal.divide(diff + player.replicanti.timer, interval);
+  let tickCount = Decimal.divide(new Decimal(diff).plus(player.replicanti.timer), interval);
   if (tickCount.lt(100)) player.replicanti.timer = tickCount.minus(tickCount.floor()).times(interval).toNumber();
   else player.replicanti.timer = 0;
   tickCount = tickCount.floor();
@@ -220,8 +240,8 @@ export function replicantiLoop(diff) {
       const intervalRatio = getReplicantiInterval(true).div(interval);
       remainingGain = remainingGain.div(intervalRatio);
       Replicanti.amount =
-        Decimal.exp(remainingGain.div(LOG10_E).times(postScale).plus(1).ln() / postScale +
-        Replicanti.amount.clampMin(1).ln());
+        Decimal.exp(remainingGain.div(LOG10_E).times(postScale).plus(1).ln().div(postScale).add(
+        Replicanti.amount.clampMin(1).ln()));
     }
   } else if (tickCount.gt(1)) {
     // Multiple ticks but "slow" gain: This happens at low replicanti chance and amount with a fast interval, which
@@ -247,11 +267,11 @@ export function replicantiLoop(diff) {
 
   if (!isUncapped) Replicanti.amount = Decimal.min(replicantiCap(), Replicanti.amount);
 
-  if (Pelle.isDoomed && Replicanti.amount.log10() - replicantiBeforeLoop.log10() > 308) {
+  if (Pelle.isDoomed && Replicanti.amount.add(1).log10().sub(replicantiBeforeLoop.log10()).gt(308)) {
     Replicanti.amount = replicantiBeforeLoop.times(1e308);
   }
 
-  if (areRGsBeingBought && Replicanti.amount.gte(Decimal.NUMBER_MAX_VALUE)) {
+  if (areRGsBeingBought && Replicanti.amount.gte(DC.NUMMAX)) {
     const buyer = Autobuyer.replicantiGalaxy;
     const isAuto = buyer.canTick && buyer.isEnabled;
     // There might be a manual and auto tick simultaneously; pass auto === true iff the autobuyer is ticking and
@@ -362,17 +382,20 @@ export const ReplicantiUpgrade = {
       // N = log(IP * (1e15 - 1) / cost + 1) / log(1e15)
       let N = Currency.infinityPoints.value.times(this.costIncrease - 1)
         .dividedBy(this.cost).plus(1).log(this.costIncrease);
-      N = Math.round((Math.min(this.value + 0.01 * Math.floor(N), this.cap) - this.value) * 100);
-      if (N <= 0) return;
+      N = Decimal.round((Decimal.min(Decimal.floor(N).times(0.01).add(this.value), this.cap).sub(this.value)).times(100));
+      if (N.lte(0)) return;
       const totalCost = this.cost.times(Decimal.pow(this.costIncrease, N).minus(1).dividedBy(this.costIncrease - 1));
       Currency.infinityPoints.subtract(totalCost);
       this.baseCost = this.baseCost.times(Decimal.pow(this.costIncrease, N));
-      this.value = this.nearestPercent(this.value + 0.01 * N);
+      this.value = this.decimalNearestPercent(N.times(0.01).add(this.value)).toNumber();
     }
 
     // Rounding errors suck
     nearestPercent(x) {
       return Math.round(100 * x) / 100;
+    }
+    decimalNearestPercent(x) {
+      return Decimal.round(x.times(100)).div(100);
     }
   }(),
   interval: new class ReplicantiIntervalUpgrade extends ReplicantiUpgradeState {
@@ -414,10 +437,10 @@ export const ReplicantiUpgrade = {
     get id() { return 3; }
 
     get value() { return player.replicanti.boughtGalaxyCap; }
-    set value(value) { player.replicanti.boughtGalaxyCap = value; }
+    set value(value) { player.replicanti.boughtGalaxyCap = new Decimal(value); }
 
     get nextValue() {
-      return this.value + 1;
+      return this.value.add(1);
     }
 
     get cost() {
@@ -428,11 +451,15 @@ export const ReplicantiUpgrade = {
     set baseCost(value) { player.replicanti.galCost = value; }
 
     get distantRGStart() {
-      return 100 + Effects.sum(GlyphSacrifice.replication);
+      return (100 + GlyphSacrifice.replication.effectValue.toNumber()) * Effects.product(BreakEternityUpgrade.replicantiGalaxyPower);
     }
 
     get remoteRGStart() {
-      return 1000 + Effects.sum(GlyphSacrifice.replication);
+      return (1000 + GlyphSacrifice.replication.effectValue.toNumber()) * Effects.product(BreakEternityUpgrade.replicantiGalaxyPower);
+    }
+
+    get contingentRGStart() {
+      return 1000000;
     }
 
     get costIncrease() {
@@ -440,11 +467,14 @@ export const ReplicantiUpgrade = {
       let increase = EternityChallenge(6).isRunning
         ? DC.E2.pow(galaxies).times(DC.E2)
         : DC.E5.pow(galaxies).times(DC.E25);
-      if (galaxies >= this.distantRGStart) {
-        increase = increase.times(DC.E50.pow(galaxies - this.distantRGStart + 5));
+      if (galaxies.gte(this.distantRGStart)) {
+        increase = increase.times(DC.E50.pow(galaxies.sub(this.distantRGStart).add(5)));
       }
-      if (galaxies >= this.remoteRGStart) {
-        increase = increase.times(DC.E5.pow(Math.pow(galaxies - this.remoteRGStart + 1, 2)));
+      if (galaxies.gte(this.remoteRGStart)) {
+        increase = increase.times(DC.E5.pow(Decimal.pow(galaxies.sub(this.remoteRGStart).add(1), 2)));
+      }
+      if (galaxies.gte(this.contingentRGStart)) {
+        increase = increase.pow(Decimal.pow(1.0002, galaxies.sub(this.contingentRGStart)));
       }
       return increase;
     }
@@ -454,42 +484,133 @@ export const ReplicantiUpgrade = {
     }
 
     get extra() {
-      return Effects.max(0, TimeStudy(131)) + PelleRifts.decay.milestones[2].effectOrDefault(0);
+      return TimeStudy(131).effectOrDefault(DC.D0).add(PelleRifts.decay.milestones[2].effectOrDefault(0));
+    }
+
+    bulkPurchaseCalc() {
+      // Copypasted constants
+      const logBase = new Decimal(170);
+      const logBaseIncrease = EternityChallenge(6).isRunning ? DC.D2 : new Decimal(25);
+      const logCostScaling = EternityChallenge(6).isRunning ? DC.D2 : DC.D5;
+      const distantReplicatedGalaxyStart = GlyphSacrifice.replication.effectValue.add(100);
+      const remoteReplicatedGalaxyStart = GlyphSacrifice.replication.effectValue.add(1000);
+      const contingentReplicatedGalaxyStart = DC.E6;
+      const logDistantScaling = new Decimal(50);
+      const logRemoteScaling = DC.D5;
+      const extraIncrements = DC.D5;
+      const contingentScalingFactor = 1.0002;
+
+      const cur = new Decimal(Currency.infinityPoints.value.times(TimeStudy(233).effectOrDefault(1)).max(1).log10());
+
+      if (logBase.gt(cur)) return;
+      let a = logCostScaling.div(2);
+      let b = logBaseIncrease.sub(logCostScaling.div(2));
+      let c = logBase.sub(cur);
+      if (decimalQuadraticSolution(a, b, c).floor().lte(distantReplicatedGalaxyStart)) {
+        // eslint-disable-next-line consistent-return
+        return decimalQuadraticSolution(a, b, c).floor().add(1);
+      }
+      a = logCostScaling.add(logDistantScaling).div(2);
+      // eslint-disable-next-line max-len
+      b = logBaseIncrease.sub(logCostScaling.div(2)).sub(logDistantScaling.times(distantReplicatedGalaxyStart)).add(logDistantScaling.times(4.5));
+      // eslint-disable-next-line max-len
+      c = cur.neg().add(170).add(distantReplicatedGalaxyStart.pow(2).times(logDistantScaling).div(2)).sub(distantReplicatedGalaxyStart.times(4.5).times(logDistantScaling));
+      if (decimalQuadraticSolution(a, b, c).floor().lte(remoteReplicatedGalaxyStart)) {
+        // eslint-disable-next-line consistent-return
+        return decimalQuadraticSolution(a, b, c).floor().add(1);
+      }
+      a = logRemoteScaling.div(3);
+
+      b = logCostScaling.add(logDistantScaling).div(2).sub(logRemoteScaling.mul(remoteReplicatedGalaxyStart))
+        .add(logRemoteScaling.div(2));
+
+      c = logBaseIncrease.sub(logCostScaling.div(2)).sub(distantReplicatedGalaxyStart.times(logDistantScaling))
+        .add(logDistantScaling.times(4.5)).add(remoteReplicatedGalaxyStart.pow(2).mul(logRemoteScaling))
+        .sub(remoteReplicatedGalaxyStart.mul(logRemoteScaling));
+
+      const d = cur.neg().add(170).add(distantReplicatedGalaxyStart.pow(2).mul(logDistantScaling).div(2))
+        .sub(distantReplicatedGalaxyStart.mul(4.5).mul(logDistantScaling))
+        .sub(remoteReplicatedGalaxyStart.pow(3).mul(logRemoteScaling).div(3))
+        .add(remoteReplicatedGalaxyStart.pow(2).mul(logRemoteScaling).div(2))
+        .sub(remoteReplicatedGalaxyStart.mul(logRemoteScaling).div(6));
+
+      if (decimalCubicSolutionX(a, b, c, d).floor().lte(contingentReplicatedGalaxyStart)) {
+        // eslint-disable-next-line consistent-return
+        return decimalCubicSolutionX(a, b, c, d).floor().add(1);
+      }
+
+      const numDistant = contingentReplicatedGalaxyStart.sub(distantReplicatedGalaxyStart);
+      const numRemote = contingentReplicatedGalaxyStart.sub(remoteReplicatedGalaxyStart);
+      const logCostAtContingent = logBase.add(contingentReplicatedGalaxyStart.times(logBaseIncrease)).add(
+        (contingentReplicatedGalaxyStart.times(contingentReplicatedGalaxyStart.sub(1)).div(2)).times(logCostScaling)).add(
+        logDistantScaling.times(numDistant).times(numDistant.add(extraIncrements.times(2)).sub(1)).div(2)).add(
+        logRemoteScaling.times(numRemote).times(numRemote.add(1)).times(numRemote.times(2).add(1)).div(6));
+      let simpleEstimate = new Decimal(Decimal.log(cur.div(logCostAtContingent), contingentScalingFactor)).add(contingentReplicatedGalaxyStart);
+      let estimatedCost = new Decimal(Decimal.log10(this.baseCostAfterCount(simpleEstimate).dividedByEffectsOf(TimeStudy(233), PelleRifts.vacuum.milestones[1])));
+      let n = 0;
+      while (n < 25 && (cur.gte(new Decimal(Decimal.log10(this.baseCostAfterCount(simpleEstimate.add(1)).dividedByEffectsOf(TimeStudy(233), PelleRifts.vacuum.milestones[1])))) || cur.lt(estimatedCost))) {
+        simpleEstimate = simpleEstimate.add(new Decimal(Decimal.log(cur.div(estimatedCost), contingentScalingFactor)));
+        estimatedCost = new Decimal(Decimal.log10(this.baseCostAfterCount(simpleEstimate).dividedByEffectsOf(TimeStudy(233), PelleRifts.vacuum.milestones[1])));
+        n++;
+      }
+      let x = 0;
+      // eslint-disable-next-line consistent-return
+      if (cur.gte(estimatedCost) && cur.lt(new Decimal(Decimal.log10(this.baseCostAfterCount(simpleEstimate.add(1)).dividedByEffectsOf(TimeStudy(233), PelleRifts.vacuum.milestones[1]))))) return simpleEstimate.add(1);
+      if (cur.lt(estimatedCost)) {
+        while (x < 50 && cur.lt(estimatedCost)) {
+          simpleEstimate = simpleEstimate.sub(1);
+          estimatedCost = new Decimal(Decimal.log10(this.baseCostAfterCount(simpleEstimate).dividedByEffectsOf(TimeStudy(233), PelleRifts.vacuum.milestones[1])));
+          x++;
+        }
+        return simpleEstimate.add(1);
+      }
+      if (cur.gte(new Decimal(Decimal.log10(this.baseCostAfterCount(simpleEstimate.add(1)).dividedByEffectsOf(TimeStudy(233), PelleRifts.vacuum.milestones[1]))))) {
+        while (x < 50 && cur.gte(new Decimal(Decimal.log10(this.baseCostAfterCount(simpleEstimate.add(1)).dividedByEffectsOf(TimeStudy(233), PelleRifts.vacuum.milestones[1]))))) {
+          simpleEstimate = simpleEstimate.add(1);
+          estimatedCost = new Decimal(Decimal.log10(this.baseCostAfterCount(simpleEstimate).dividedByEffectsOf(TimeStudy(233), PelleRifts.vacuum.milestones[1])));
+          x++;
+        }
+        return simpleEstimate.add(1);
+      }
+      throw new Error("Failed to calculate a finite value for Max Replicanti Galaxy Purchases.");
     }
 
     autobuyerTick() {
       // This isn't a hot enough autobuyer to worry about doing an actual inverse.
-      const bulk = bulkBuyBinarySearch(Currency.infinityPoints.value, {
-        costFunction: x => this.baseCostAfterCount(x).dividedByEffectOf(TimeStudy(233)),
-        firstCost: this.cost,
-        cumulative: true,
-      }, this.value);
-      if (!bulk) return;
-      Currency.infinityPoints.subtract(bulk.purchasePrice);
-      this.value += bulk.quantity;
+      const bulk = this.bulkPurchaseCalc();
+      if (!bulk || bulk.floor().sub(this.value).lte(0)) return;
+      Currency.infinityPoints.subtract(this.baseCostAfterCount(this.value).sub(1));
+      this.value = this.value.add(bulk.sub(this.value));
       this.baseCost = this.baseCostAfterCount(this.value);
     }
 
-    baseCostAfterCount(count) {
+    baseCostAfterCount(countNum) {
+      let count = new Decimal(countNum);
       const logBase = 170;
       const logBaseIncrease = EternityChallenge(6).isRunning ? 2 : 25;
       const logCostScaling = EternityChallenge(6).isRunning ? 2 : 5;
-      const distantReplicatedGalaxyStart = 100 + Effects.sum(GlyphSacrifice.replication);
-      const remoteReplicatedGalaxyStart = 1000 + Effects.sum(GlyphSacrifice.replication);
-      let logCost = logBase + count * logBaseIncrease + (count * (count - 1) / 2) * logCostScaling;
-      if (count > distantReplicatedGalaxyStart) {
+      const distantReplicatedGalaxyStart = (100 + GlyphSacrifice.replication.effectValue.toNumber()) * Effects.product(BreakEternityUpgrade.replicantiGalaxyPower);
+      const remoteReplicatedGalaxyStart = (1000 + GlyphSacrifice.replication.effectValue.toNumber()) * Effects.product(BreakEternityUpgrade.replicantiGalaxyPower);
+      const contingentReplicatedGalaxyStart = 1000000;
+      let logCost = new Decimal(logBase).add(count.times(logBaseIncrease)).add((count.times(count.sub(1)).div(2)).times(logCostScaling)).toNumber();
+      if (count.gt(distantReplicatedGalaxyStart)) {
         const logDistantScaling = 50;
         // When distant scaling kicks in, the price increase jumps by a few extra steps.
         // So, the difference between successive scales goes 5, 5, 5, 255, 55, 55, ...
         const extraIncrements = 5;
-        const numDistant = count - distantReplicatedGalaxyStart;
-        logCost += logDistantScaling * numDistant * (numDistant + 2 * extraIncrements - 1) / 2;
+        const numDistant = count.sub(distantReplicatedGalaxyStart);
+        logCost += new Decimal(logDistantScaling).times(numDistant).times(numDistant.add(2 * extraIncrements).sub(1)).div(2).toNumber();
       }
-      if (count > remoteReplicatedGalaxyStart) {
+      if (count.gt(remoteReplicatedGalaxyStart)) {
         const logRemoteScaling = 5;
-        const numRemote = count - remoteReplicatedGalaxyStart;
+        const numRemote = count.sub(remoteReplicatedGalaxyStart);
         // The formula x * (x + 1) * (2 * x + 1) / 6 is the sum of the first n squares.
-        logCost += logRemoteScaling * numRemote * (numRemote + 1) * (2 * numRemote + 1) / 6;
+        logCost += new Decimal(logRemoteScaling).times(numRemote).times(numRemote.add(1)).times(numRemote.times(2).add(1)).div(6).toNumber();
+      }
+      if (count.gt(contingentReplicatedGalaxyStart)) {
+        const contingentScalingFactor = 1.0002;
+        const numContingent = count.sub(contingentReplicatedGalaxyStart);
+        logCost *= Decimal.pow(contingentScalingFactor, numContingent).toNumber();
       }
       return Decimal.pow10(logCost);
     }
@@ -510,8 +631,8 @@ export const Replicanti = {
       chanceCost: DC.E150,
       interval: 1000,
       intervalCost: DC.E140,
-      boughtGalaxyCap: 0,
-      galaxies: 0,
+      boughtGalaxyCap: DC.D0,
+      galaxies: DC.D0,
       galCost: DC.E170,
     };
   },
@@ -536,24 +657,27 @@ export const Replicanti = {
   },
   galaxies: {
     isPlayerHoldingR: false,
+    get multiplication() {
+      return GalacticPowers.replicantiGalaxies.isUnlocked ? GalacticPowers.replicantiGalaxies.reward : 1;
+    },
     get bought() {
       return player.replicanti.galaxies;
     },
     get extra() {
-      return Math.floor((Effects.sum(
+      return Decimal.floor((new Decimal().plusEffectsOf(
         TimeStudy(225),
         TimeStudy(226)
-      ) + Effarig.bonusRG) * TimeStudy(303).effectOrDefault(1));
+      ).add(Effarig.bonusRG)).times(TimeStudy(303).effectOrDefault(1)).times(this.multiplication).add(this.bought.times(this.multiplication - 1)));
     },
     get total() {
-      return this.bought + this.extra;
+      return this.bought.add(this.extra);
     },
     get max() {
-      return ReplicantiUpgrade.galaxies.value + ReplicantiUpgrade.galaxies.extra;
+      return ReplicantiUpgrade.galaxies.value.add(ReplicantiUpgrade.galaxies.extra);
     },
     get canBuyMore() {
-      if (!Replicanti.amount.gte(Decimal.NUMBER_MAX_VALUE)) return false;
-      return this.bought < this.max;
+      if (!Replicanti.amount.gte(DC.NUMMAX)) return false;
+      return this.bought.lt(this.max);
     },
     get areBeingBought() {
       const buyer = Autobuyer.replicantiGalaxy;
@@ -562,13 +686,13 @@ export const Replicanti = {
         (!player.options.confirmations.replicantiGalaxy && this.isPlayerHoldingR);
     },
     get gain() {
-      if (!this.canBuyMore) return 0;
+      if (!this.canBuyMore) return DC.D0;
       if (Achievement(126).isUnlocked) {
-        const maxGain = Replicanti.galaxies.max - player.replicanti.galaxies;
-        const logReplicanti = Replicanti.amount.log10();
-        return Math.min(maxGain, Math.floor(logReplicanti / LOG10_MAX_VALUE));
+        const maxGain = Replicanti.galaxies.max.sub(player.replicanti.galaxies);
+        const logReplicanti = Replicanti.amount.add(1).log10();
+        return Decimal.min(maxGain, Decimal.floor(logReplicanti.div(LOG10_MAX_VALUE)));
       }
-      return 1;
+      return DC.D1;
     },
   },
   get isUncapped() {

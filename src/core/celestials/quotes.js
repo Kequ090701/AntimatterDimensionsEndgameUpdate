@@ -83,8 +83,10 @@ class QuoteLine {
 
     const replacementMatch = /\$(\d+)/gu;
 
+    const usernameReplacementMatch = /%name+/gu;
+
     this._line = typeof line === "string"
-      ? line
+      ? () => line.replaceAll(usernameReplacementMatch, player.username)
       // This matches each digit after a $ and replaces it with the wordCycle of an array with the digit it matched.
       : () => line.text.replaceAll(replacementMatch, (_, i) => wordShift.wordCycle(line[i]));
   }
@@ -174,5 +176,9 @@ export const Quotes = {
   pelle: mapGameDataToObject(
     GameDatabase.celestials.quotes.pelle,
     config => new CelQuotes(config, "pelle")
+  ),
+  alpha: mapGameDataToObject(
+    GameDatabase.celestials.quotes.alpha,
+    config => new CelQuotes(config, "alpha")
   ),
 };

@@ -1,9 +1,8 @@
 import { GameMechanicState, SetPurchasableMechanicState } from "./game-mechanics";
-import { DC } from "./constants";
 import FullScreenAnimationHandler from "./full-screen-animation-handler";
 
 function giveEternityRewards(auto) {
-  player.records.bestEternity.time = Math.min(player.records.thisEternity.time, player.records.bestEternity.time);
+  player.records.bestEternity.time = Decimal.min(player.records.thisEternity.time, player.records.bestEternity.time);
   Currency.eternityPoints.add(gainedEternityPoints());
 
   const newEternities = gainedEternities();
@@ -45,7 +44,7 @@ function giveEternityRewards(auto) {
 
   Currency.infinitiesBanked.value = Currency.infinitiesBanked.value.plusEffectsOf(
     Achievement(131).effects.bankedInfinitiesGain,
-    TimeStudy(191)
+    TimeStudy(191).effects.bankedInfinitiesGain,
   );
 
   if (Effarig.isRunning && !EffarigUnlock.eternity.isUnlocked) {
@@ -105,7 +104,7 @@ export function eternity(force, auto, specialConditions = {}) {
   }
 
   player.challenge.eternity.current = 0;
-  if (!specialConditions.enteringEC && !Pelle.isDoomed) {
+  if (!specialConditions.enteringEC && (!Pelle.isDoomed || PelleStrikes.dilation.isDestroyed())) {
     player.dilation.active = false;
   }
   resetInfinityRuns();
@@ -177,7 +176,7 @@ export function initializeChallengeCompletions(isReality) {
   if (!isReality && EternityMilestone.keepAutobuyers.isReached || Pelle.isDoomed) {
     NormalChallenges.completeAll();
   }
-  if (Achievement(133).isUnlocked && !Pelle.isDoomed) InfinityChallenges.completeAll();
+  if (Achievement(133).isUnlocked && (!Pelle.isDoomed || PelleAchievementUpgrade.achievement133.isBought)) InfinityChallenges.completeAll();
   player.challenge.normal.current = 0;
   player.challenge.infinity.current = 0;
 }
@@ -185,20 +184,22 @@ export function initializeChallengeCompletions(isReality) {
 export function initializeResourcesAfterEternity() {
   player.sacrificed = DC.D0;
   Currency.infinities.reset();
-  player.records.bestInfinity.time = 999999999999;
+  player.records.bestInfinity.time = new Decimal(999999999999);
   player.records.bestInfinity.realTime = 999999999999;
-  player.records.thisInfinity.time = 0;
-  player.records.thisInfinity.lastBuyTime = 0;
+  player.records.thisInfinity.time = DC.D0;
+  player.records.thisInfinity.lastBuyTime = DC.D0;
   player.records.thisInfinity.realTime = 0;
-  player.dimensionBoosts = (EternityMilestone.keepInfinityUpgrades.isReached) ? 4 : 0;
-  player.galaxies = (EternityMilestone.keepInfinityUpgrades.isReached) ? 1 : 0;
-  player.partInfinityPoint = 0;
+  player.dimensionBoosts = (EternityMilestone.keepInfinityUpgrades.isReached) ? DC.D4 : DC.D0;
+  player.galaxies = (EternityMilestone.keepInfinityUpgrades.isReached) ? DC.D1 : DC.D0;
+  player.partInfinityPoint = DC.D0;
   player.partInfinitied = 0;
   player.IPMultPurchases = 0;
   Currency.infinityPower.reset();
   Currency.timeShards.reset();
-  player.records.thisEternity.time = 0;
+  player.records.thisEternity.time = DC.D0;
   player.records.thisEternity.realTime = 0;
+  player.records.totalInfinityAntimatter = DC.E1;
+  player.records.totalEternityAntimatter = DC.E1;
   player.totalTickGained = 0;
   player.eterc8ids = 50;
   player.eterc8repl = 40;
@@ -233,10 +234,17 @@ function askEternityConfirmation() {
 }
 
 export function gainedEternities() {
-  return Pelle.isDisabled("eternityMults")
-    ? new Decimal(1)
-    : new Decimal(getAdjustedGlyphEffect("timeetermult"))
-      .timesEffectsOf(RealityUpgrade(3), Achievement(113))
+  if (Pelle.isDoomed) {
+    let pelleEternities = new Decimal(1);
+    if (PelleAchievementUpgrade.achievement102.isBought) pelleEternities = pelleEternities.timesEffectsOf(Achievement(102));
+    if (PelleAchievementUpgrade.achievement113.isBought) pelleEternities = pelleEternities.timesEffectsOf(Achievement(113));
+    if (PelleRealityUpgrade.eternalAmplifier.isBought) pelleEternities = pelleEternities.timesEffectsOf(RealityUpgrade(3));
+    if (PelleDestructionUpgrade.destroyedGlyphEffects.isBought) pelleEternities = pelleEternities.times(getAdjustedGlyphEffect("timeetermult"));
+    if (PelleAlchemyUpgrade.alchemyEternity.isBought) pelleEternities = pelleEternities.pow(AlchemyResource.eternity.effectValue);
+    return pelleEternities;
+  }
+  return new Decimal(getAdjustedGlyphEffect("timeetermult"))
+      .timesEffectsOf(RealityUpgrade(3),Achievement(102),Achievement(113))
       .pow(AlchemyResource.eternity.effectValue);
 }
 
@@ -277,7 +285,7 @@ class EPMultiplierState extends GameMechanicState {
   }
 
   get isAffordable() {
-    return !Pelle.isDoomed && Currency.eternityPoints.gte(this.cost);
+    return (!Pelle.isDoomed || PelleDestructionUpgrade.x5EPUpgrade.isBought) && Currency.eternityPoints.gte(this.cost);
   }
 
   get cost() {
@@ -313,20 +321,56 @@ class EPMultiplierState extends GameMechanicState {
     return true;
   }
 
+  costInv() {
+    let tempVal = DC.D0;
+    let bulk = DC.D1;
+    let cur = Currency.eternityPoints.value.max(1);
+    if (cur.gt(this.costIncreaseThresholds[3]) && !EndgameMastery(152).isBought) {
+      cur = Decimal.log(cur.div(500), 1e3);
+      return Decimal.max(Decimal.floor(Decimal.pow(cur.add(Decimal.pow(1332, 1.2)), 1 / 1.2)), 1332).toNumber();
+      // eslint-disable-next-line no-else-return
+    }
+    if (cur.gt(this.costIncreaseThresholds[2])) {
+      bulk = Decimal.floor(this.costIncreaseThresholds[2].div(500).log(500));
+      tempVal = DC.E3.pow(bulk).times(500);
+      cur = cur.div(tempVal.max(1 / 1e3));
+      return Decimal.floor(bulk.add(cur.log(1e3)).add(1)).toNumber();
+    }
+    if (cur.gt(this.costIncreaseThresholds[1])) {
+      bulk = Decimal.floor(this.costIncreaseThresholds[1].div(500).log(100));
+      tempVal = (DC.E2.times(5)).pow(bulk).times(500);
+      cur = cur.div(tempVal.max(1 / 500));
+      return Decimal.floor(bulk.add(cur.log(500)).add(1)).toNumber();
+    }
+    if (cur.gt(this.costIncreaseThresholds[0])) {
+      bulk = Decimal.floor(this.costIncreaseThresholds[0].div(500).log(50));
+      tempVal = DC.E2.pow(bulk).times(500);
+      cur = cur.div(tempVal.max(1 / 100));
+      return Decimal.floor(bulk.add(cur.log(100)).add(1)).toNumber();
+    }
+    return Decimal.floor(cur.div(500).max(1 / 50).log(50).add(1)).toNumber();
+  }
+
   buyMax(auto) {
     if (!this.isAffordable) return false;
     if (RealityUpgrade(15).isLockingMechanics) {
       if (!auto) RealityUpgrade(15).tryShowWarningModal();
       return false;
     }
-    const bulk = bulkBuyBinarySearch(Currency.eternityPoints.value, {
-      costFunction: this.costAfterCount,
-      cumulative: true,
-      firstCost: this.cost,
-    }, this.boughtAmount);
-    if (!bulk) return false;
-    Currency.eternityPoints.subtract(bulk.purchasePrice);
-    this.boughtAmount += bulk.quantity;
+    let bulk = Math.floor(this.costInv());
+    if (bulk < 1) return false;
+    const price = this.costAfterCount(bulk - 1);
+    bulk = Math.max(bulk - this.boughtAmount, 0);
+    if (bulk === 0 || !isFinite(bulk)) return false;
+    Currency.eternityPoints.subtract(price);
+    this.boughtAmount = this.boughtAmount + bulk;
+    let i = 0;
+    while (Currency.eternityPoints.gt(this.costAfterCount(this.boughtAmount)) &&
+    i < 50 && this.boughtAmount <= 9e15) {
+      this.boughtAmount += 1;
+      Currency.eternityPoints.subtract(this.costAfterCount(this.boughtAmount - 1));
+      i += 1;
+    }
     return true;
   }
 
@@ -335,7 +379,12 @@ class EPMultiplierState extends GameMechanicState {
   }
 
   get costIncreaseThresholds() {
-    return [DC.E100, Decimal.NUMBER_MAX_VALUE, DC.E1300, DC.E4000];
+    return [
+      DC.E100.powEffectsOf(BreakEternityUpgrade.epMultiplierDelay),
+      DC.NUMMAX.powEffectsOf(BreakEternityUpgrade.epMultiplierDelay),
+      DC.E1300.powEffectsOf(BreakEternityUpgrade.epMultiplierDelay),
+      DC.E4000.powEffectsOf(BreakEternityUpgrade.epMultiplierDelay)
+    ];
   }
 
   costAfterCount(count) {
@@ -345,7 +394,8 @@ class EPMultiplierState extends GameMechanicState {
       const cost = Decimal.pow(multPerUpgrade[i], count).times(500);
       if (cost.lt(costThresholds[i])) return cost;
     }
-    return DC.E3.pow(count + Math.pow(Math.clampMin(count - 1334, 0), 1.2)).times(500);
+    const purchaseScale = EndgameMastery(152).isBought ? count : Math.pow(count, 1.2) - Math.pow(1332, 1.2);
+    return DC.E3.pow(purchaseScale).times(500);
   }
 }
 

@@ -20,6 +20,7 @@ import ExitDilationModal from "@/components/modals/prestige/ExitDilationModal";
 import HardResetModal from "@/components/modals/prestige/HardResetModal";
 import RealityModal from "@/components/modals/prestige/RealityModal";
 import ReplicantiGalaxyModal from "@/components/modals/prestige/ReplicantiGalaxyModal";
+import ResetEndgameModal from "@/components/modals/prestige/ResetEndgameModal";
 import ResetRealityModal from "@/components/modals/prestige/ResetRealityModal";
 
 import AnimationOptionsModal from "@/components/modals/options/AnimationOptionsModal";
@@ -33,6 +34,7 @@ import HotkeysModal from "@/components/modals/options/HotkeysModal";
 import InfoDisplayOptionsModal from "@/components/modals/options/InfoDisplayOptionsModal";
 import NewsOptionsModal from "@/components/modals/options/NewsOptionsModal";
 import NotationModal from "@/components/modals/options/NotationModal";
+import PreferredMasteryTreeModal from "@/components/modals/options/PreferredMasteryTreeModal";
 import PreferredTreeModal from "@/components/modals/options/PreferredTreeModal";
 import SingleGlyphAppearanceModal from "@/components/modals/options/glyph-appearance/SingleGlyphAppearanceModal";
 
@@ -47,6 +49,7 @@ import SacrificeGlyphModal from "@/components/modals/glyph-management/SacrificeG
 import AutobuyerEditModal from "@/components/modals/AutobuyerEditModal";
 import AutomatorScriptTemplate from "@/components/modals/AutomatorScriptTemplate";
 import AwayProgressModal from "@/components/modals/AwayProgressModal";
+import BreakEternityModal from "@/components/modals/BreakEternityModal";
 import BreakInfinityModal from "@/components/modals/BreakInfinityModal";
 import CatchupModal from "@/components/modals/catchup/CatchupModal";
 import ChangelogModal from "@/components/modals/ChangelogModal";
@@ -64,6 +67,7 @@ import ImportSaveModal from "@/components/modals/ImportSaveModal";
 import ImportTimeStudyConstants from "@/components/modals/ImportTimeStudyConstants";
 import InformationModal from "@/components/modals/InformationModal";
 import LoadGameModal from "@/components/modals/LoadGameModal";
+import MasteryStringModal from "@/components/modals/MasteryStringModal";
 import ModifySeedModal from "@/components/modals/ModifySeedModal";
 import PelleEffectsModal from "@/components/modals/PelleEffectsModal";
 import RealityGlyphCreationModal from "@/components/modals/RealityGlyphCreationModal";
@@ -80,6 +84,8 @@ import UndoGlyphModal from "@/components/modals/UndoGlyphModal";
 import UpgradeMechanicLockModal from "@/components/modals/UpgradeMechanicLockModal";
 
 import S12GamesModal from "@/components/modals/secret-themes/S12GamesModal";
+
+import UsernameModal from "@/components/modals/UsernameModal";
 
 let nextModalID = 0;
 export class Modal {
@@ -211,6 +217,7 @@ Modal.enterDilation = new Modal(EnterDilationModal, 1, GAME_EVENT.REALITY_RESET_
 Modal.exitDilation = new Modal(ExitDilationModal, 1, GAME_EVENT.REALITY_RESET_AFTER);
 Modal.reality = new Modal(RealityModal, 1, GAME_EVENT.REALITY_RESET_AFTER);
 Modal.resetReality = new Modal(ResetRealityModal, 1, GAME_EVENT.REALITY_RESET_AFTER);
+Modal.resetEndgame = new Modal(ResetEndgameModal, 1, GAME_EVENT.ENDGAME_RESET_AFTER);
 Modal.celestials = new Modal(EnterCelestialsModal, 1);
 Modal.hardReset = new Modal(HardResetModal, 1);
 Modal.backupWindows = new Modal(BackupWindowModal, 1);
@@ -229,6 +236,7 @@ Modal.hotkeys = new Modal(HotkeysModal);
 Modal.newsOptions = new Modal(NewsOptionsModal);
 Modal.animationOptions = new Modal(AnimationOptionsModal);
 Modal.hiddenTabs = new Modal(HiddenTabsModal);
+Modal.preferredMasteryTree = new Modal(PreferredMasteryTreeModal);
 Modal.preferredTree = new Modal(PreferredTreeModal);
 Modal.notation = new Modal(NotationModal);
 
@@ -265,13 +273,17 @@ Modal.importTSConstants = new Modal(ImportTimeStudyConstants);
 Modal.autobuyerEditModal = new Modal(AutobuyerEditModal);
 Modal.shop = new Modal(StdStoreModal);
 Modal.studyString = new Modal(StudyStringModal);
+Modal.masteryString = new Modal(MasteryStringModal);
 Modal.singularityMilestones = new Modal(SingularityMilestonesModal);
 Modal.pelleEffects = new Modal(PelleEffectsModal);
 Modal.sacrifice = new Modal(SacrificeModal, 1, GAME_EVENT.DIMBOOST_AFTER);
+Modal.breakEternity = new Modal(BreakEternityModal, 1);
 Modal.breakInfinity = new Modal(BreakInfinityModal, 1, GAME_EVENT.ETERNITY_RESET_AFTER);
 Modal.respecIAP = new Modal(RespecIAPModal);
 
 Modal.s12Games = new Modal(S12GamesModal);
+
+Modal.username = new Modal(UsernameModal, 1);
 
 function getSaveInfo(save) {
   const resources = {
@@ -283,7 +295,7 @@ function getSaveInfo(save) {
     infinityPoints: new Decimal(0),
     eternityPoints: new Decimal(0),
     realityMachines: new Decimal(0),
-    imaginaryMachines: 0,
+    imaginaryMachines: new Decimal(0),
     dilatedTime: new Decimal(0),
     bestLevel: 0,
     pelleAM: new Decimal(0),
@@ -304,7 +316,7 @@ function getSaveInfo(save) {
   resources.infinityPoints.copyFrom(new Decimal(save.infinityPoints));
   resources.eternityPoints.copyFrom(new Decimal(save.eternityPoints));
   resources.realityMachines.copyFrom(new Decimal(save.reality?.realityMachines));
-  resources.imaginaryMachines = save.reality?.iMCap ?? 0;
+  resources.imaginaryMachines.copyFrom(new Decimal(save.reality?.iMCap));
   // Use max DT instead of current DT because spending it can cause it to drop and trigger the conflict modal
   // unnecessarily. We only use current DT as a fallback (eg. loading a save from pre-reality versions)
   resources.dilatedTime.copyFrom(new Decimal(save.records?.thisReality.maxDT ?? (save.dilation?.dilatedTime ?? 0)));

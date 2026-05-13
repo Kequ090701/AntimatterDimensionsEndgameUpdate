@@ -1,5 +1,3 @@
-import { DC } from "../../constants";
-
 export const GlyphCombiner = Object.freeze({
   /**
    * @param {number[]} x
@@ -74,7 +72,8 @@ export const glyphEffects = {
     formatEffect: x => format(x, 2, 2),
     combine: GlyphCombiner.multiply,
     alteredColor: () => GlyphAlteration.getBoostColor("time"),
-    alterationType: ALTERATION_TYPE.BOOST
+    alterationType: ALTERATION_TYPE.BOOST,
+    enabledInDoomed: () => PelleDestructionUpgrade.destroyedGlyphEffects.isBought
   },
   timeEP: {
     id: "timeEP",
@@ -99,7 +98,8 @@ export const glyphEffects = {
     conversion: x => 1 + Math.log10(x) / 1000,
     formatSecondaryEffect: x => format(x, 4, 4),
     alteredColor: () => GlyphAlteration.getAdditionColor("time"),
-    alterationType: ALTERATION_TYPE.ADDITION
+    alterationType: ALTERATION_TYPE.ADDITION,
+    enabledInDoomed: () => PelleDestructionUpgrade.destroyedGlyphEffects.isBought
   },
   dilationDT: {
     id: "dilationDT",
@@ -115,7 +115,8 @@ export const glyphEffects = {
     formatEffect: x => format(x, 2, 1),
     combine: GlyphCombiner.multiplyDecimal,
     alteredColor: () => GlyphAlteration.getEmpowermentColor("dilation"),
-    alterationType: ALTERATION_TYPE.EMPOWER
+    alterationType: ALTERATION_TYPE.EMPOWER,
+    enabledInDoomed: () => PelleDestructionUpgrade.destroyedGlyphEffects.isBought
   },
   dilationgalaxyThreshold: {
     id: "dilationgalaxyThreshold",
@@ -133,7 +134,7 @@ export const glyphEffects = {
     combine: effects => {
       const prod = effects.reduce(Number.prodReducer, 1);
       return prod < 0.4
-        ? { value: 0.4 - Math.pow(0.4 - prod, 1.7), capped: true }
+        ? { value: Math.max(0.4 - Math.pow(0.4 - prod, 1.7), 0.1) / Math.abs(prod - 2), capped: true }
         : { value: prod, capped: false };
     },
     enabledInDoomed: true,
@@ -163,7 +164,8 @@ export const glyphEffects = {
     conversion: x => Math.clampMin(Math.pow(10000 * x, 1.6), 1),
     formatSecondaryEffect: x => format(x, 2, 2),
     alteredColor: () => GlyphAlteration.getAdditionColor("dilation"),
-    alterationType: ALTERATION_TYPE.ADDITION
+    alterationType: ALTERATION_TYPE.ADDITION,
+    enabledInDoomed: () => PelleDestructionUpgrade.destroyedGlyphEffects.isBought
   },
   dilationpow: {
     id: "dilationpow",
@@ -195,7 +197,8 @@ export const glyphEffects = {
     formatEffect: x => format(x, 2, 1),
     combine: GlyphCombiner.multiplyDecimal,
     alteredColor: () => GlyphAlteration.getEmpowermentColor("replication"),
-    alterationType: ALTERATION_TYPE.EMPOWER
+    alterationType: ALTERATION_TYPE.EMPOWER,
+    enabledInDoomed: () => PelleDestructionUpgrade.destroyedGlyphEffects.isBought
   },
   replicationpow: {
     id: "replicationpow",
@@ -247,6 +250,7 @@ export const glyphEffects = {
     formatSingleSecondaryEffect: x => format(x, 5, 5),
     alteredColor: () => GlyphAlteration.getAdditionColor("replication"),
     alterationType: ALTERATION_TYPE.ADDITION,
+    enabledInDoomed: () => PelleDestructionUpgrade.destroyedGlyphEffects.isBought
   },
   replicationglyphlevel: {
     id: "replicationglyphlevel",
@@ -328,7 +332,8 @@ export const glyphEffects = {
     conversion: x => 1 + Math.log10(x) / 1800,
     formatSecondaryEffect: x => format(x, 4, 4),
     alteredColor: () => GlyphAlteration.getAdditionColor("infinity"),
-    alterationType: ALTERATION_TYPE.ADDITION
+    alterationType: ALTERATION_TYPE.ADDITION,
+    enabledInDoomed: () => PelleDestructionUpgrade.destroyedGlyphEffects.isBought
   },
   infinityinfmult: {
     id: "infinityinfmult",
@@ -345,7 +350,8 @@ export const glyphEffects = {
     formatEffect: x => format(x, 2, 1),
     combine: GlyphCombiner.multiplyDecimal,
     alteredColor: () => GlyphAlteration.getEmpowermentColor("infinity"),
-    alterationType: ALTERATION_TYPE.EMPOWER
+    alterationType: ALTERATION_TYPE.EMPOWER,
+    enabledInDoomed: () => PelleDestructionUpgrade.destroyedGlyphEffects.isBought
   },
   powerpow: {
     id: "powerpow",
@@ -434,7 +440,8 @@ export const glyphEffects = {
     formatEffect: x => format(x, 2, 2),
     combine: GlyphCombiner.multiply,
     alteredColor: () => GlyphAlteration.getEmpowermentColor("effarig"),
-    alterationType: ALTERATION_TYPE.EMPOWER
+    alterationType: ALTERATION_TYPE.EMPOWER,
+    enabledInDoomed: () => !Pelle.isGlyphTypeDisabled("effarig")
   },
   effarigglyph: {
     id: "effarigglyph",
@@ -447,6 +454,7 @@ export const glyphEffects = {
     effect: (level, strength) => Math.floor(10 * Math.pow(level * strength, 0.5)),
     formatEffect: x => formatInt(x),
     combine: GlyphCombiner.add,
+    enabledInDoomed: () => !Pelle.isGlyphTypeDisabled("effarig")
   },
   effarigblackhole: {
     id: "effarigblackhole",
@@ -461,6 +469,7 @@ export const glyphEffects = {
     formatEffect: x => format(x, 3, 3),
     formatSingleEffect: x => format(x - 1, 3, 3),
     combine: GlyphCombiner.addExponents,
+    enabledInDoomed: () => !Pelle.isGlyphTypeDisabled("effarig")
   },
   effarigachievement: {
     id: "effarigachievement",
@@ -477,7 +486,8 @@ export const glyphEffects = {
     formatSingleEffect: x => format(x - 1, 3, 3),
     combine: GlyphCombiner.addExponents,
     alteredColor: () => GlyphAlteration.getBoostColor("effarig"),
-    alterationType: ALTERATION_TYPE.BOOST
+    alterationType: ALTERATION_TYPE.BOOST,
+    enabledInDoomed: () => !Pelle.isGlyphTypeDisabled("effarig")
   },
   effarigforgotten: {
     id: "effarigforgotten",
@@ -502,7 +512,8 @@ export const glyphEffects = {
     conversion: x => Math.pow(x, 0.4),
     formatSecondaryEffect: x => format(x, 2, 2),
     alteredColor: () => GlyphAlteration.getAdditionColor("effarig"),
-    alterationType: ALTERATION_TYPE.ADDITION
+    alterationType: ALTERATION_TYPE.ADDITION,
+    enabledInDoomed: () => !Pelle.isGlyphTypeDisabled("effarig")
   },
   effarigdimensions: {
     id: "effarigdimensions",
@@ -517,6 +528,7 @@ export const glyphEffects = {
     formatEffect: x => format(x, 3, 3),
     formatSingleEffect: x => format(x - 1, 3, 3),
     combine: GlyphCombiner.addExponents,
+    enabledInDoomed: () => !Pelle.isGlyphTypeDisabled("effarig")
   },
   effarigantimatter: {
     id: "effarigantimatter",
@@ -529,6 +541,7 @@ export const glyphEffects = {
     effect: (level, strength) => 1 + Math.pow(level, 0.25) * Math.pow(strength, 0.4) / 5000,
     formatEffect: x => format(x, 4, 4),
     combine: GlyphCombiner.multiply,
+    enabledInDoomed: () => !Pelle.isGlyphTypeDisabled("effarig")
   },
   timeshardpow: {
     id: "timeshardpow",
@@ -558,6 +571,7 @@ export const glyphEffects = {
     effect: level => Math.pow(level, -0.03),
     formatEffect: x => formatPercents(1 - x, 2),
     combine: GlyphCombiner.multiply,
+    enabledInDoomed: () => !Pelle.isGlyphTypeDisabled("cursed"),
   },
   curseddimensions: {
     id: "curseddimensions",
@@ -570,6 +584,7 @@ export const glyphEffects = {
     effect: level => Math.pow(level, -0.035),
     formatEffect: x => format(x, 3, 3),
     combine: GlyphCombiner.multiply,
+    enabledInDoomed: () => !Pelle.isGlyphTypeDisabled("cursed"),
   },
   cursedtickspeed: {
     id: "cursedtickspeed",
@@ -583,6 +598,7 @@ export const glyphEffects = {
     effect: level => Math.clampMin(Math.log10(level), 1),
     formatEffect: x => format(x, 3, 3),
     combine: GlyphCombiner.add,
+    enabledInDoomed: () => !Pelle.isGlyphTypeDisabled("cursed"),
   },
   cursedEP: {
     id: "cursedEP",
@@ -596,6 +612,7 @@ export const glyphEffects = {
     effect: level => Decimal.pow10(-level / 10),
     formatEffect: x => format(x.reciprocal()),
     combine: GlyphCombiner.multiplyDecimal,
+    enabledInDoomed: () => !Pelle.isGlyphTypeDisabled("cursed"),
   },
   realityglyphlevel: {
     id: "realityglyphlevel",
@@ -608,6 +625,7 @@ export const glyphEffects = {
     effect: level => Math.floor(Math.sqrt(level * 90)),
     formatEffect: x => formatInt(x),
     combine: GlyphCombiner.add,
+    enabledInDoomed: () => false // Disabled by function getAdjustedGlyphLevel(...)
   },
   realitygalaxies: {
     id: "realitygalaxies",
@@ -620,6 +638,7 @@ export const glyphEffects = {
     effect: level => 1 + Math.pow(level / 100000, 0.5),
     formatEffect: x => formatPercents(x - 1, 2),
     combine: GlyphCombiner.multiply,
+    enabledInDoomed: () => !Pelle.isGlyphTypeDisabled("reality")
   },
   realityrow1pow: {
     id: "realityrow1pow",
@@ -632,6 +651,7 @@ export const glyphEffects = {
     effect: level => 1 + level / 125000,
     formatEffect: x => format(x, 3, 3),
     combine: GlyphCombiner.addExponents,
+    enabledInDoomed: () => !Pelle.isGlyphTypeDisabled("reality")
   },
   realityDTglyph: {
     id: "realityDTglyph",
@@ -645,9 +665,11 @@ export const glyphEffects = {
     genericDesc: "Dilated Time factor for Glyph level",
     shortDesc: "DT pow. for level +{value}",
     // You can only get this effect on level 25000 reality glyphs anyway, might as well make it look nice
-    effect: () => 0.1,
+    // Disregard my man Hevi's above comment we pushing this shit
+    effect: level => Math.pow(level / 25000, 0.5) / 10,
     formatEffect: x => format(x, 2, 2),
     combine: GlyphCombiner.add,
+    enabledInDoomed: () => !Pelle.isGlyphTypeDisabled("reality")
   },
   companiondescription: {
     id: "companiondescription",

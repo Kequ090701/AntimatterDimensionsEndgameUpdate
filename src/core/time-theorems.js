@@ -1,5 +1,3 @@
-import { DC } from "./constants";
-
 /**
  * @abstract
  */
@@ -16,6 +14,7 @@ export class TimeTheoremPurchaseType {
 
   add(amount) { this.amount += amount; }
 
+  willInfinity(amount) {return !isFinite(this.amount + amount);}
   /**
   * @abstract
   */
@@ -35,7 +34,7 @@ export class TimeTheoremPurchaseType {
 
   get bulkPossible() {
     if (Perk.ttFree.canBeApplied) {
-      return Math.floor(this.currency.value.divide(this.cost).log10() / this.costIncrement.log10() + 1);
+      return Decimal.floor(this.currency.value.divide(this.cost).log10().div(this.costIncrement.log10()).add(1)).toNumber();
     }
     return Decimal.affordGeometricSeries(this.currency.value, this.cost, this.costIncrement, 0).toNumber();
   }
@@ -50,6 +49,7 @@ export class TimeTheoremPurchaseType {
     if (!this.canAfford) return false;
     let purchased = false;
     const amount = this.bulkPossible;
+    if (this.willInfinity(amount)) return false;
     const buyFn = cost => (Perk.ttFree.canBeApplied ? this.currency.gte(cost) : this.currency.purchase(cost));
     // This will sometimes buy one too few for EP, so we just have to buy 1 after.
     if (bulk && buyFn(this.bulkCost(amount))) {

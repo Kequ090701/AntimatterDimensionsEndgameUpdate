@@ -82,6 +82,7 @@ html {
   --color-reality-light: #d5ffd7;
   --color-reality-dark: #0a790c;
   --color-celestials: #5151ec;
+  --color-endgame: #fff017;
   --color-prestige--accent: white;
 
   --color-teresa--base: #5151ec;
@@ -104,6 +105,8 @@ html {
 
   --color-pelle--base: crimson;
   --color-pelle--secondary: #00bcd4;
+
+  --color-alpha--base: #00ea00;
 }
 
 :root .t-metro,
@@ -123,6 +126,7 @@ html {
   --color-reality: #3a823d;
   --color-reality-light: #d5ffd7;
   --color-celestials: #00bcd4;
+  --color-endgame: #f6be00;
 }
 
 :root .t-dark {
@@ -161,6 +165,7 @@ html {
   --color-reality: #4caf50;
   --color-reality-dark: #0ba00e;
   --color-celestials: #00bcd4;
+  --color-endgame: #f6be00;
   --color-prestige--accent: black;
 
   --color-teresa--accent: black;
@@ -201,6 +206,7 @@ html {
   --color-reality: #4caf50;
   --color-reality-dark: #0ba00e;
   --color-celestials: #00bcd4;
+  --color-endgame: #f6be00;
   --color-prestige--accent: black;
 
   --color-teresa--accent: black;
@@ -225,6 +231,7 @@ html {
   --color-reality-light: #e8e3e4;
   --color-reality-dark: #7a7273;
   --color-celestials: #f2d6c1;
+  --color-endgame: #8588ee;
   --color-prestige--accent: #dbd242;
 
   --color-pelle--base: #7cb727;
@@ -659,6 +666,210 @@ button:focus {
 
 /* #endregion TT shop */
 
+/* #region ES shop */
+
+.endgame-skill-buttons {
+  display: flex;
+  width: 55.5rem;
+  position: absolute;
+  bottom: 0;
+  z-index: 2;
+  align-items: flex-end;
+  font-family: Typewriter, serif;
+  color: var(--color-text);
+  pointer-events: all;
+}
+
+.l-es-buy-button {
+  width: 17rem;
+  z-index: 1;
+  margin: 0.3rem;
+}
+
+.c-es-buy-button {
+  font-family: Typewriter, serif;
+  font-size: 1.35rem;
+  font-weight: bold;
+  border: 0.1rem solid var(--color-endgame);
+  border-radius: var(--var-border-radius, 4px);
+  transition-duration: 0.2s;
+}
+
+.c-es-buy-button--unlocked {
+  color: var(--color-endgame);
+  background: #232028;
+  cursor: pointer;
+}
+
+.c-es-buy-button--unlocked:hover {
+  color: #232028;
+  background: var(--color-endgame);
+}
+
+.c-es-buy-button--locked {
+  color: black;
+  background: #4a4a4a;
+}
+
+.c-es-buy-button--locked:hover {
+  background: #652f2f;
+}
+
+.endgameskills {
+  flex: 1 0 auto;
+  text-align: center;
+  font-size: 15px;
+}
+
+.esbuttons-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: stretch;
+  transition: all 0.25s ease-out;
+}
+
+.esbuttons-top-row {
+  align-items: center;
+}
+
+.o-es-top-row-button {
+  flex-grow: 0;
+  flex-shrink: 0;
+  min-height: 3rem;
+  align-self: stretch;
+  font-size: 1.2rem;
+  margin: 0.3rem;
+  padding-right: 1rem;
+  padding-left: 1rem;
+}
+
+.o-es-autobuyer-button {
+  flex-grow: 0;
+  flex-shrink: 0;
+  height: 2.5rem;
+  min-width: 8rem;
+  align-self: stretch;
+  font-size: 1rem !important;
+  margin: 0.3rem;
+  padding-right: 1rem;
+  padding-left: 1rem;
+}
+
+.l-es-save-load-btn__wrapper {
+  position: relative;
+  margin: 0.3rem;
+}
+
+.l-es-save-load-btn {
+  min-width: 2rem;
+}
+
+.l-es-save-load-btn__menu {
+  position: absolute;
+  top: -0.5rem;
+  left: 50%;
+  padding: 0.5rem 0;
+  transform: translate(-50%, -100%);
+}
+
+.c-es-save-load-btn__menu {
+  text-align: left;
+  font-family: Typewriter;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: white;
+  background: black;
+  border-radius: var(--var-border-radius, 0.5rem);
+}
+
+.l-es-save-load-btn__menu::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  border-color: black transparent transparent;
+  border-style: solid;
+  border-width: var(--var-border-width, 0.5rem);
+  margin-left: -0.5rem;
+}
+
+.l-es-save-load-btn__menu-rename {
+  margin: 0.3rem 0.5rem 0.5rem 0.7rem;
+}
+
+.c-es-save-load-btn__menu-rename {
+  text-align: left;
+  font-family: Typewriter;
+  font-size: 1.4rem;
+  font-weight: bold;
+  border: none;
+  border-radius: var(--var-border-radius, 0.3rem);
+  padding: 0.2rem;
+}
+
+.c-es-autobuyer-toggle {
+  color: initial;
+}
+
+.l-es-buy-max-vbox {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.esshop-background {
+  z-index: 1;
+  background: var(--color-base);
+  border: var(--var-border-width, 0.2rem) solid black;
+  border-bottom: none;
+  border-top-left-radius: var(--var-border-radius, 7px);
+  border-top-right-radius: var(--var-border-radius, 7px);
+}
+
+.t-s6 .esshop-background,
+.t-s10 .esshop-background {
+  border: 0.1rem solid var(--color-endgame);
+}
+
+.esshop-container {
+  display: flex;
+  flex-direction: column;
+  min-width: 60rem;
+  max-width: 80rem;
+  padding: 0 0.5rem;
+  transition: all 0.25s ease-out;
+}
+
+.esshop-minimize-btn {
+  display: flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  justify-content: center;
+  align-items: center;
+  font-size: 2.1rem;
+  color: var(--color-text);
+  margin-left: -0.2rem;
+  cursor: pointer;
+}
+
+.t-s6 .esshop-minimize-btn,
+.t-s10 .esshop-minimize-btn,
+.s-base--metro .esshop-minimize-btn {
+  margin-left: -0.1rem;
+}
+
+.t-s6 .esshop-minimize-btn,
+.t-s10 .esshop-minimize-btn {
+  color: var(--color-endgame);
+}
+
+.c-esshop__save-load-text {
+  font-size: 10px;
+}
+
+/* #endregion ES shop */
+
 .l-dim-path-priority {
   position: absolute;
   right: 0.5rem;
@@ -666,6 +877,32 @@ button:focus {
 }
 
 .o-time-study-selection-btn {
+  width: 20rem;
+  height: 6rem;
+  position: relative;
+  font-family: Typewriter, serif;
+  font-size: 1.65rem;
+  font-weight: bold;
+  background-color: black;
+  border: 0.1rem solid;
+  border-radius: var(--var-border-radius, 0.4rem);
+  margin: 1rem;
+  transition-duration: 0.2s;
+}
+
+.l-comp-path-priority {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.5rem;
+}
+
+.l-curr-path-priority {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.5rem;
+}
+
+.o-endgame-mastery-selection-btn {
   width: 20rem;
   height: 6rem;
   position: relative;
@@ -752,6 +989,16 @@ button:focus {
 
 .o-tab-btn--celestial:hover {
   background: var(--color-celestials);
+}
+
+.o-tab-btn--endgame {
+  color: var(--color-endgame);
+  background-color: var(--color-prestige--accent);
+  border-color: var(--color-endgame);
+}
+
+.o-tab-btn--endgame:hover {
+  background: var(--color-endgame);
 }
 
 /* #endregion tab buttons */
@@ -923,6 +1170,138 @@ button:focus {
 
 .l-reality-amplify-button--clickable {
   cursor: pointer;
+}
+
+.l-endgame-button {
+  width: 35rem;
+  height: 6rem;
+}
+
+.t-metro .l-endgame-button {
+  box-shadow: 0.1rem 0.1rem 0.1rem 0 #9e9e9e;
+}
+
+.l-endgame-button__contents {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.c-endgame-button__header {
+  font-size: 1.2rem;
+  line-height: 1.6;
+}
+
+.c-endgame-button {
+  width: 100%;
+  height: 100%;
+  font-family: Typewriter;
+  font-size: 1.2rem;
+  font-weight: bold;
+  background: var(--color-background);
+  border-style: solid;
+  border-width: var(--var-border-width, 0.2rem);
+  border-radius: var(--var-border-radius, 0.4rem);
+  transition-duration: 0.2s;
+}
+
+.c-endgame-button--special {
+  animation: a-endgame-reward-glow 3s infinite;
+}
+
+.c-endgame-reminder {
+  display: flex;
+  width: calc(100% - 1rem);
+  justify-content: center;
+  align-items: center;
+  font-size: 1.4rem;
+  border: 0.1rem solid #b8b8b8;
+  border-radius: var(--var-border-radius, 0.5rem);
+  padding: 1rem;
+}
+
+@keyframes a-endgame-reward-glow {
+  0% { box-shadow: inset 0 0 4rem var(--color-pelle--base); }
+  50% { box-shadow: inset 0 0 0; }
+  100% { box-shadow: inset 0 0 4rem var(--color-pelle--base); }
+}
+
+.t-s6 .c-endgame-button,
+.t-s10 .c-endgame-button {
+  background: black;
+}
+
+.c-endgame-button--unlocked {
+  color: var(--color-endgame);
+  border-color: var(--color-endgame);
+  cursor: pointer;
+}
+
+.c-endgame-button--locked {
+  color: #181818;
+  background-color: #9e9e9e;
+  border-color: var(--color-bad);
+}
+
+.t-s6 .c-endgame-button--locked,
+.t-s10 .c-endgame-button--locked {
+  color: grey;
+}
+
+.c-endgame-button--unlocked:hover,
+.c-endgame-button--unlocked.force-hover {
+  color: black;
+  background: var(--color-endgame);
+}
+
+.c-endgame-button--locked:hover {
+  color: #1d1d1d;
+  background-color: var(--color-bad);
+}
+
+.l-reset-endgame-button {
+  display: block;
+  width: 44rem;
+  height: 6rem;
+}
+
+.c-reset-endgame-button {
+  font-family: Typewriter;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--color-bad);
+  background: var(--color-background);
+  border-color: var(--color-bad);
+  border-style: solid;
+  border-width: var(--var-border-width, 0.2rem);
+  border-radius: var(--var-border-radius, 0.4rem);
+  transition-duration: 0.2s;
+  cursor: pointer;
+}
+
+.c-reset-endgame-button:hover,
+.c-reset-endgame-button.force-hover,
+.t-s6 .c-reset-endgame-button:hover,
+.t-s6 .c-reset-endgame-button.force-hover,
+.t-s10 .c-reset-endgame-button:hover,
+.t-s10 .c-reset-endgame-button.force-hover {
+  color: black;
+  background: var(--color-bad);
+}
+
+.c-reset-endgame-button-doom {
+  color: var(--color-pelle--base);
+  border-color: var(--color-pelle--base);
+}
+
+.c-reset-endgame-button-doom:hover,
+.c-reset-endgame-button-doom.force-hover,
+.t-s6 .c-reset-endgame-button-doom:hover,
+.t-s6 .c-reset-endgame-button-doom.force-hover,
+.t-s10 .c-reset-endgame-button-doom:hover,
+.t-s10 .c-reset-endgame-button-doom.force-hover {
+  color: black;
+  background: var(--color-pelle--base);
 }
 
 [draggable] {
@@ -1782,6 +2161,12 @@ br {
   font-size: 1rem;
 }
 
+.o-primary-btn--endgame-mastery-options {
+  width: 15rem;
+  height: 4rem;
+  font-size: 1rem;
+}
+
 .o-primary-btn--respec-active {
   background-color: var(--color-eternity) !important;
 }
@@ -1798,6 +2183,14 @@ br {
 .o-primary-btn--charged-respec-active:hover {
   color: var(--color-teresa--accent);
   background-color: var(--color-teresa--base) !important;
+}
+
+.o-primary-btn--endgame-respec-active {
+  background-color: var(--color-endgame) !important;
+}
+
+.o-primary-btn--endgame-respec-active:hover {
+  color: var(--color-base);
 }
 
 .o-primary-btn--glyph-trash {
@@ -2174,12 +2567,27 @@ br {
   top: -1.95rem;
 }
 
+.l-hint-text--endgame-mastery {
+  top: -1.95rem;
+}
+
 .l-hint-text--reality-upgrade {
   top: -1.7rem;
   font-size: 1.25rem;
 }
 
 .c-hint-text--reality-upgrade {
+  font-weight: bold;
+  color: var(--color-text);
+  text-shadow: none;
+}
+
+.l-hint-text--endgame-upgrade {
+  top: -1.7rem;
+  font-size: 1.25rem;
+}
+
+.c-hint-text--endgame-upgrade {
   font-weight: bold;
   color: var(--color-text);
   text-shadow: none;
@@ -2638,6 +3046,10 @@ br {
   100% { box-shadow: -1.5rem -1.5rem 0.5rem white, 1.5rem 1.5rem 0.5rem white; }
 }
 
+.o-primary-btn--tesseract-toggle {
+  font-size: 1.2rem;
+}
+
 /* #endregion l-infinity-dim-tab */
 
 /* #region c-infinity-dim-description__accent */
@@ -2669,6 +3081,16 @@ br {
 }
 
 /* #endregion c-infinity-dim-description__accent */
+
+/* #region c-infinity-dim-compression-description__accent */
+
+.c-infinity-dim-compression-description__accent {
+  font-size: 2rem;
+  color: #ff0000;
+  text-shadow: 0 0 0.7rem #ff0000;
+}
+
+/* #endregion c-infinity-dim-compression-description__accent */
 
 /* #endregion Infinity Dimensions */
 
@@ -2715,7 +3137,92 @@ br {
 
 /* #endregion c-time-dim-description__accent */
 
+/* #region c-time-dim-compression-description__accent */
+
+.c-time-dim-compression-description__accent {
+  font-size: 2rem;
+  color: #ff0000;
+  text-shadow: 0 0 0.7rem #ff0000;
+}
+
+/* #endregion c-time-dim-compression-description__accent */
+
 /* #endregion Time Dimensions */
+
+/* #region Celestial Dimensions */
+
+/* #region l-celestial-dim-tab */
+
+.l-celestial-dim-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--color-text);
+}
+
+/* #endregion l-celestial-dim-tab */
+
+/* #region c-celestial-dim-description__accent */
+
+.c-celestial-dim-description__accent {
+  font-size: 3.5rem;
+  color: black;
+}
+
+.t-metro .c-celestial-dim-description__accent,
+.t-s8 .c-celestial-dim-description__accent {
+  text-shadow: 0 0 0.1rem rgba(0, 0, 0, 50%), -0.1rem 0.1rem 0.1rem black;
+}
+
+.t-dark .c-celestial-dim-description__accent,
+.t-amoled .c-celestial-dim-description__accent,
+.t-amoled-metro .c-celestial-dim-description__accent,
+.t-s6 .c-celestial-dim-description__accent,
+.t-s10 .c-celestial-dim-description__accent,
+.t-s11 .c-celestial-dim-description__accent {
+  color: var(--color-endgame);
+  text-shadow: 0 0 0.7rem var(--color-endgame);
+}
+
+.t-metro .c-celestial-dim-description__accent,
+.t-dark-metro .c-celestial-dim-description__accent,
+.t-s8 .c-celestial-dim-description__accent {
+  color: var(--color-celestials);
+}
+
+/* #endregion c-celestial-dim-description__accent */
+
+/* #region c-celestial-dim-description__accent-unstable */
+
+.c-celestial-dim-description__accent-unstable {
+  font-size: 3.5rem;
+  color: black;
+}
+
+.t-metro .c-celestial-dim-description__accent-unstable,
+.t-s8 .c-celestial-dim-description__accent-unstable {
+  text-shadow: 0 0 0.1rem rgba(0, 0, 0, 50%), -0.1rem 0.1rem 0.1rem black;
+}
+
+.t-dark .c-celestial-dim-description__accent-unstable,
+.t-amoled .c-celestial-dim-description__accent-unstable,
+.t-amoled-metro .c-celestial-dim-description__accent-unstable,
+.t-s6 .c-celestial-dim-description__accent-unstable,
+.t-s10 .c-celestial-dim-description__accent-unstable,
+.t-s11 .c-celestial-dim-description__accent-unstable {
+  color: var(--color-pelle--base);
+  text-shadow: 0 0 0.7rem var(--color-pelle--base);
+}
+
+.t-metro .c-celestial-dim-description__accent-unstable,
+.t-dark-metro .c-celestial-dim-description__accent-unstable,
+.t-s8 .c-celestial-dim-description__accent-unstable {
+  color: var(--color-pelle--base);
+}
+
+/* #endregion c-celestial-dim-description__accent-unstable */
+
+/* #endregion Celestial Dimensions */
 
 /* #region Options */
 
@@ -5138,6 +5645,396 @@ properly on certain themes. */
 
 /* #endregion Dilation */
 
+/* #region Break Eternity */
+
+/* #region l-break-eternity-tab */
+
+.l-break-eternity-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.l-break-eternity-tab__break-btn {
+  margin-top: 2rem;
+}
+
+.l-break-eternity-tab__grid {
+  margin-top: 1rem;
+}
+
+/* #endregion l-break-eternity-tab */
+
+/* #region l-break-eternity-upgrade-grid */
+
+.l-break-eternity-upgrade-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.l-break-eternity-upgrade-grid__row {
+  display: flex;
+  flex-direction: row;
+}
+
+.l-break-eternity-upgrade-grid__cell {
+  margin: 0.5rem 0.8rem;
+}
+
+/* #endregion l-break-eternity-upgrade-grid */
+
+/* #endregion Break Eternity */
+
+/* #region Break Eternity Upgrades */
+
+.l-break-eternity-upgrade-btn {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  justify-content: center;
+  align-items: center;
+  margin: 1.2rem;
+  padding: 0 0.5rem;
+}
+
+/* #region o-break-eternity-upgrade-btn */
+
+.o-break-eternity-upgrade-btn {
+  width: 19rem;
+  height: 9rem;
+  font-family: Typewriter, serif;
+  font-size: 1rem;
+  font-weight: bold;
+  color: white;
+  background-color: #1f1f1f;
+  border: 0.1rem solid black;
+  border-radius: var(--var-border-radius, 0.4rem);
+  transition-duration: 0.2s;
+  cursor: pointer;
+}
+
+.t-s6 .o-break-eternity-upgrade-btn,
+.t-s10 .o-break-eternity-upgrade-btn {
+  box-shadow: 0 0 0.7rem 0.2rem #111111;
+}
+
+.o-break-eternity-upgrade-btn:hover {
+  color: var(--color-text-inverted);
+}
+
+/* #endregion o-break-eternity-upgrade-btn */
+
+/* #region o-infinity-upgrade-btn--available */
+
+.o-break-eternity-upgrade-btn--available:hover {
+  background-color: #ff3300;
+}
+
+.t-dark .o-break-eternity-upgrade-btn--available:hover,
+.t-s6 .o-break-eternity-upgrade-btn--available:hover,
+.t-s10 .o-break-eternity-upgrade-btn--available:hover {
+  background-color: #d50000;
+}
+
+.s-base--metro .o-break-eternity-upgrade-btn--available:hover {
+  background-color: #f44336;
+}
+
+/* #endregion o-break-eternity-upgrade-btn--available */
+
+/* #region o-break-eternity-upgrade-btn--color-2 */
+
+.o-break-eternity-upgrade-btn--color-2.o-break-eternity-upgrade-btn--available:hover {
+  background-color: var(--color-eternity);
+}
+
+.t-dark .o-break-eternity-upgrade-btn--color-2.o-break-eternity-upgrade-btn--available:hover,
+.t-s6 .o-break-eternity-upgrade-btn--color-2.o-break-eternity-upgrade-btn--available:hover,
+.t-s10 .o-break-eternity-upgrade-btn--color-2.o-break-eternity-upgrade-btn--available:hover {
+  background-color: var(--color-eternity);
+}
+
+.s-base--metro .o-break-eternity-upgrade-btn--color-2.o-break-eternity-upgrade-btn--available:hover {
+  background-color: var(--color-eternity);
+}
+
+/* #endregion o-break-eternity-upgrade-btn--color-2 */
+
+/* #region o-break-eternity-upgrade-btn--unavailable */
+
+.o-break-eternity-upgrade-btn--unavailable {
+  color: black;
+  background-color: #f7f7f7;
+}
+
+.o-break-eternity-upgrade-btn--unclickable {
+  cursor: auto;
+}
+
+.o-break-eternity-upgrade-btn--unavailable:hover {
+  color: var(--color-text);
+  background-color: var(--color-text-inverted);
+  cursor: default;
+}
+
+.t-dark .o-break-eternity-upgrade-btn--unavailable {
+  background-color: #263238;
+  border-color: black;
+}
+
+.t-dark .o-break-eternity-upgrade-btn--unavailable:hover {
+  background-color: #37474f;
+}
+
+.s-base--metro .o-break-eternity-upgrade-btn--unavailable {
+  background-color: #9e9e9e;
+  border-color: #616161;
+}
+
+.s-base--metro .o-break-eternity-upgrade-btn--unavailable:hover {
+  color: var(--color-text-inverted);
+  background-color: #bdbdbd;
+}
+
+.t-s1 .o-break-eternity-upgrade-btn--unavailable {
+  background-color: #9a921d;
+  border-color: black;
+}
+
+.t-s1 .o-break-eternity-upgrade-btn--unavailable:hover {
+  background-color: #c5ba26;
+}
+
+.t-s6 .o-break-eternity-upgrade-btn--unavailable,
+.t-s10 .o-break-eternity-upgrade-btn--unavailable {
+  color: grey;
+  background-color: black;
+  border-color: grey;
+}
+
+.t-s6 .o-break-eternity-upgrade-btn--unavailable:hover,
+.t-s10 .o-break-eternity-upgrade-btn--unavailable:hover {
+  background-color: #222222;
+}
+
+/* #endregion o-break-eternity-upgrade-btn--unavailable */
+
+.o-break-eternity-upgrade {
+  width: 20rem;
+  height: 9rem;
+  font-family: Typewriter, serif;
+  font-size: 1rem;
+  font-weight: bold;
+  border: 0.1rem solid var(--color-eternity);
+  border-radius: var(--var-border-radius, 0.4rem);
+  transition-duration: 0.2s;
+  cursor: pointer;
+}
+
+.o-break-eternity-upgrade--useless {
+  color: black;
+  background-color: var(--color-pelle--base);
+  border-color: black;
+  filter: grayscale(50%);
+}
+
+.o-break-eternity-upgrade--available {
+  color: var(--color-eternity);
+  background-color: black;
+}
+
+.o-break-eternity-upgrade--available:hover {
+  color: var(--color-text);
+  background-color: var(--color-eternity);
+}
+
+.o-break-eternity-upgrade--unavailable {
+  color: #181818;
+  background-color: #5f5f5f;
+  cursor: default;
+}
+
+.o-break-eternity-upgrade--unavailable:hover {
+  background-color: #737373;
+}
+
+.o-break-eternity-upgrade--bought {
+  color: black;
+  background-color: var(--color-eternity);
+  border-color: black;
+  cursor: default;
+}
+
+.t-metro .o-break-eternity-upgrade--available {
+  box-shadow: 0.1rem 0.1rem 0.1rem 0 #9e9e9e;
+}
+
+.s-base--metro .o-break-eternity-upgrade--bought {
+  color: black;
+  background-color: #673ab7;
+  border-color: black;
+}
+
+.s-base--metro .o-break-eternity-upgrade--unavailable {
+  background-color: #9e9e9e;
+  border-color: black;
+}
+
+.s-base--metro .o-break-eternity-upgrade--unavailable:hover {
+  background-color: #bdbdbd;
+}
+
+.t-dark .o-break-eternity-upgrade--available,
+.t-s6 .o-break-eternity-upgrade--available,
+.t-s10 .o-break-eternity-upgrade--available {
+  background-color: black;
+}
+
+.t-dark .o-break-eternity-upgrade--available:hover,
+.t-s6 .o-break-eternity-upgrade--available:hover,
+.t-s10 .o-break-eternity-upgrade--available:hover {
+  color: var(--color-text);
+  background-color: var(--color-eternity);
+}
+
+.t-dark .o-break-eternity-upgrade--unavailable {
+  color: black;
+  background-color: #263238;
+  border-color: #691fa5;
+}
+
+.t-dark .o-break-eternity-upgrade--unavailable:hover {
+  background-color: #37474f;
+}
+
+.t-s6 .o-break-eternity-upgrade--unavailable,
+.t-s10 .o-break-eternity-upgrade--unavailable {
+  color: grey;
+  background-color: black;
+  border-color: #691fa5;
+}
+
+.t-s6 .o-break-eternity-upgrade--unavailable:hover,
+.t-s10 .o-break-eternity-upgrade--unavailable:hover {
+  background-color: #222222;
+}
+
+.t-dark .o-break-eternity-upgrade--bought,
+.t-s6 .o-break-eternity-upgrade--bought,
+.t-s10 .o-break-eternity-upgrade--bought {
+  color: var(--color-text-inverted);
+  background-color: var(--color-eternity);
+  border-color: #691fa5;
+}
+
+.t-s1 .o-break-eternity-upgrade--available {
+  background-color: black;
+}
+
+.t-s1 .o-break-eternity-upgrade--available:hover {
+  color: black;
+  background-color: #639565;
+  border-color: black;
+}
+
+.t-s1 .o-break-eternity-upgrade--bought {
+  color: black;
+  background-color: #639565;
+  border-color: black;
+}
+
+.t-s1 .o-break-eternity-upgrade--unavailable {
+  color: black;
+  background-color: #4a4a4a;
+  border-color: #639565;
+}
+
+.t-s1 .o-break-eternity-upgrade--unavailable:hover {
+  background: #636363;
+}
+
+/* #endregion Break Eternity Upgrades */
+
+/* #region Expansion Packs */
+
+.l-expansion-packs-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* #endregion Expansion Packs */
+
+/* #region Endgame Milestones */
+
+.l-endgame-milestone-grid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.l-endgame-milestone-grid__row {
+  display: flex;
+  flex-direction: row;
+}
+
+.l-endgame-milestone-grid__cell {
+  margin: 0.5rem 0.8rem;
+}
+
+.o-endgame-milestone__goal {
+  text-align: left;
+  font-size: 2rem;
+}
+
+.o-endgame-milestone__reward {
+  width: 25rem;
+  height: 8rem;
+  font-family: Typewriter, serif;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: black;
+  border: 0.1rem solid var(--color-endgame);
+  border-radius: var(--var-border-radius, 0.4rem);
+  transition-duration: 0.2s;
+}
+
+.o-endgame-milestone__reward--locked {
+  background-color: dimgrey;
+}
+
+.o-endgame-milestone__reward--reached {
+  background-color: var(--color-endgame);
+  border-color: black;
+}
+
+.o-endgame-milestone__reward--small-font {
+  font-size: 1.1rem;
+}
+
+.s-base--metro .o-endgame-milestone__reward--locked,
+.t-s1 .o-endgame-milestone__reward--locked {
+  background-color: #9e9e9e;
+  border: none;
+  box-shadow: 0.1rem 0.1rem 0.1rem 0 black;
+}
+
+.t-dark .o-endgame-milestone__reward--locked,
+.t-s6 .o-endgame-milestone__reward--locked,
+.t-s10 .o-endgame-milestone__reward--locked {
+  color: var(--color-endgame);
+  background-color: black;
+  border-color: var(--color-endgame);
+  animation: a-time-study 7s infinite;
+}
+
+.l-endgame-milestone {
+  display: flex;
+  flex-direction: column;
+}
+
+/* #endregion Endgame Milestones */
+
 /* #region Modals */
 
 @keyframes a-modal-overlay-fadein {
@@ -5424,6 +6321,27 @@ properly on certain themes. */
 
 /* #endregion c-modal-hard-reset */
 
+/* #region c-modal-username */
+
+.c-modal-username-danger {
+  font-weight: bold;
+  color: var(--color-bad);
+}
+
+.c-modal-username-btn {
+  margin-top: 0.3rem;
+}
+
+.c-modal-username-info > div {
+  margin-top: 0.2rem;
+}
+
+.c-modal-username__input {
+  width: 45rem;
+}
+
+/* #endregion c-modal-username */
+
 /* #region c-modal-away-progress */
 
 .c-modal-away-progress {
@@ -5702,6 +6620,11 @@ kbd {
 .o-notification--reality {
   background-color: var(--color-reality);
   border-color: var(--color-reality);
+}
+
+.o-notification--endgame {
+  background-color: var(--color-endgame);
+  border-color: var(--color-endgame);
 }
 
 .o-notification--automator {
@@ -6716,6 +7639,49 @@ kbd {
 
 .o-v-milestone--unlocked {
   background: var(--color-v--base);
+  border-color: #b89c2e;
+}
+
+.l-v-upgrades-grid {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.o-v-upgrade {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 25rem;
+  height: 10rem;
+  font-family: Typewriter;
+  font-size: 1.2rem;
+  color: black;
+  background: #6b5f2e;
+  border: var(--var-border-width, 0.2rem) solid #473f1f;
+  border-radius: var(--var-border-radius, 0.5rem);
+  margin: 0 0.5rem;
+  padding: 1rem;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.o-v-upgrade--available {
+  background: #6b5f2e;
+  color: var(--color-v--base);
+  border-color: #b89c2e;
+}
+
+.o-v-upgrade--available:hover {
+  background: var(--color-v--base);
+  color: black;
+  border-color: #b89c2e;
+  cursor: pointer;
+}
+
+.o-v-upgrade--capped {
+  background: var(--color-v--base);
+  color: black;
   border-color: #b89c2e;
 }
 
@@ -7757,6 +8723,10 @@ kbd {
   width: 44rem;
 }
 
+.o-laitela-run-button--larger {
+  height: 112rem;
+}
+
 .o-laitela-matter-amount {
   font-size: 1.5rem;
   margin-bottom: 0.5rem;
@@ -8157,6 +9127,10 @@ kbd {
   padding: 1rem;
 }
 
+.l-laitela-annihilation-container--large {
+  height: 27rem;
+}
+
 .l-laitela-annihilation-button {
   width: 35rem;
   height: 3rem;
@@ -8212,6 +9186,36 @@ kbd {
 
 .s-base--metro .c-laitela-automation-toggle {
   box-shadow: none;
+}
+
+.l-laitela-hadronize-button {
+  width: 20rem;
+  height: 3rem;
+  font-family: Typewriter, serif;
+  font-size: 1.1rem;
+  color: var(--color-laitela--accent);
+  background: linear-gradient(var(--color-laitela--base), var(--color-laitela--accent));
+  border: var(--var-border-width, 0.2rem) solid var(--color-laitela--accent);
+  border-radius: var(--var-border-radius, 0.5rem);
+  padding: 0.5rem;
+}
+
+.c-laitela-hadronize-button {
+  transition-duration: 0.3s;
+  cursor: pointer;
+}
+
+.c-laitela-hadronize-button h2 {
+  color: inherit;
+}
+
+.c-laitela-hadronize-button b {
+  color: inherit;
+}
+
+.c-laitela-hadronize-button:hover {
+  color: var(--color-laitela--base) !important; /* h2 color overrides this */
+  background: linear-gradient(var(--color-laitela--accent), var(--color-laitela--base));
 }
 
 /* #endregion laitela tab */
@@ -8662,6 +9666,357 @@ kbd {
 
 .c-perk-tab__perk-points {
   color: var(--color-reality);
+}
+
+.l-endgame-upgrade-grid {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+  margin-top: 1.2rem;
+}
+
+.l-endgame-upgrade-grid__row {
+  display: flex;
+  flex-direction: row;
+}
+
+.l-endgame-upgrade-btn {
+  display: flex;
+  flex-direction: column;
+  width: 20.5rem;
+  height: 10rem;
+  position: relative;
+  justify-content: center;
+  align-items: center;
+  margin: 1.2rem;
+  padding: 0 0.5rem;
+}
+
+.c-endgame-upgrade-btn {
+  text-align: center;
+  font-family: Typewriter, serif;
+  font-size: 1rem;
+  color: #5151ec;
+  background-color: black;
+  border: var(--var-border-width, 0.2rem) solid var(--color-endgame);
+  border-radius: var(--var-border-radius, 0.5rem);
+  transition-duration: 0.15s;
+  cursor: pointer;
+}
+
+.s-base--dark .c-endgame-upgrade-btn {
+  color: #5151ec;
+}
+
+.c-endgame-upgrade-btn__requirement {
+  font-weight: bold;
+}
+
+.c-endgame-upgrade-btn:hover {
+  color: #5151ec;
+  background-color: var(--color-endgame);
+}
+
+.c-endgame-upgrade-btn--unavailable {
+  color: var(--color-endgame);
+  background-color: #404040;
+  cursor: default;
+}
+
+.c-endgame-upgrade-btn--unavailable:hover {
+  color: var(--color-endgame);
+  background-color: #404040;
+}
+
+.c-endgame-upgrade-btn--bought {
+  color: #5151ec;
+  background-color: var(--color-endgame);
+  border-color: #6d6a09;
+  cursor: default;
+}
+
+.c-endgame-upgrade-btn--bought:hover {
+  color: #5151ec;
+  background-color: var(--color-endgame);
+}
+
+.c-endgame-upgrade-btn--possible {
+  /* Text color gets inherited from other pseudo-classes; so we use !important here in order to ensure good contrast
+    specifically on reality and imaginary upgrades, the only upgrades which use this and the related --locked below */
+  color: black !important;
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      #A2A229,
+      #A2A229 3rem,
+      #919122 3rem,
+      #919122 6rem
+    );
+  cursor: default;
+}
+
+.c-endgame-upgrade-btn--possible:hover {
+  /* This is actually a solid color, but it flickers on hover if we don't make it a linear-gradient */
+  background: linear-gradient(0deg, #919122, #919122);
+}
+
+.c-endgame-upgrade-btn--locked {
+  color: white !important;
+  background: #952020;
+  background-image:
+    linear-gradient(45deg, #802222 25%, transparent 25%),
+    linear-gradient(135deg, #802222 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #802222 75%),
+    linear-gradient(135deg, transparent 75%, #802222 75%);
+  background-position: 0 0, 2rem 0, 2rem -2rem, 0 2rem;
+  background-size: 4rem 4rem;
+  cursor: default;
+}
+
+.c-endgame-upgrade-btn--locked:hover {
+  background-color: #802222;
+}
+
+.t-dark .c-endgame-upgrade-btn--unavailable {
+  color: var(--color-endgame);
+  background-color: #37474f;
+}
+
+.t-s6.c-endgame-upgrade-btn:hover,
+.t-s10.c-endgame-upgrade-btn:hover {
+  background-color: var(--color-endgame);
+}
+
+.t-s6.c-endgame-upgrade-btn--unavailable:hover,
+.t-s10.c-endgame-upgrade-btn--unavailable:hover {
+  color: var(--color-endgame);
+  background-color: #656565;
+}
+
+.t-s6.c-endgame-upgrade-btn--bought,
+.t-s10.c-endgame-upgrade-btn--bought {
+  background-color: var(--color-endgame);
+  border-color: #6d6a09;
+}
+
+.t-s6.c-endgame-upgrade-btn--bought:hover,
+.t-s10.c-endgame-upgrade-btn--bought:hover {
+  color: #5151ec;
+  background-color: var(--color-endgame);
+}
+
+@keyframes a-galactic-power-amount-cycle {
+  0% {
+    color: #ff0000;
+    text-shadow: #ff0000 0 0 3px;
+  }
+
+  17% {
+    color: #ffff00;
+    text-shadow: #ffff00 0 0 3px;
+  }
+
+  33% {
+    color: #00ff00;
+    text-shadow: #00ff00 0 0 3px;
+  }
+
+  50% {
+    color: #00ffff;
+    text-shadow: #00ffff 0 0 3px;
+  }
+
+  67% {
+    color: #0000ff;
+    text-shadow: #0000ff 0 0 3px;
+  }
+
+  83% {
+    color: #ff00ff;
+    text-shadow: #ff00ff 0 0 3px;
+  }
+
+  100% {
+    color: #ff0000;
+    text-shadow: #ff0000 0 0 3px;
+  }
+}
+
+.l-endgame-button-column {
+  display: flex;
+  flex-direction: row;
+  width: 44rem;
+  height: 6rem;
+  padding: 0.5rem;
+  position: relative;
+  justify-content: center;
+  align-items: center;
+}
+
+.o-expansion-pack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: Typewriter, serif;
+  width: 98rem;
+  height: 25rem;
+  margin: 1rem;
+  padding: 1rem;
+}
+
+.o-expansion-pack--teresa {
+  color: var(--color-teresa--base);
+  background: black;
+  border: var(--var-border-width, 0.2rem) solid var(--color-teresa--base);
+  border-radius: var(--var-border-radius, 0.5rem);
+}
+
+.o-expansion-pack--teresa:hover {
+  color: black;
+  background: var(--color-teresa--base);
+  border: var(--var-border-width, 0.2rem) solid var(--color-teresa--base);
+  border-radius: var(--var-border-radius, 0.5rem);
+  cursor: pointer;
+}
+
+.o-expansion-pack--teresa--bought {
+  color: black;
+  background: var(--color-teresa--base);
+  border: var(--var-border-width, 0.2rem) solid var(--color-teresa--base);
+  border-radius: var(--var-border-radius, 0.5rem);
+}
+
+.o-expansion-pack--effarig {
+  color: var(--color-effarig--base);
+  background: black;
+  border: var(--var-border-width, 0.2rem) solid var(--color-effarig--base);
+  border-radius: var(--var-border-radius, 0.5rem);
+}
+
+.o-expansion-pack--effarig:hover {
+  color: black;
+  background: var(--color-effarig--base);
+  border: var(--var-border-width, 0.2rem) solid var(--color-effarig--base);
+  border-radius: var(--var-border-radius, 0.5rem);
+  cursor: pointer;
+}
+
+.o-expansion-pack--effarig--bought {
+  color: black;
+  background: var(--color-effarig--base);
+  border: var(--var-border-width, 0.2rem) solid var(--color-effarig--base);
+  border-radius: var(--var-border-radius, 0.5rem);
+}
+
+.o-expansion-pack--enslaved {
+  color: var(--color-enslaved--base);
+  background: black;
+  border: var(--var-border-width, 0.2rem) solid var(--color-enslaved--base);
+  border-radius: var(--var-border-radius, 0.5rem);
+}
+
+.o-expansion-pack--enslaved:hover {
+  color: black;
+  background: var(--color-enslaved--base);
+  border: var(--var-border-width, 0.2rem) solid var(--color-enslaved--base);
+  border-radius: var(--var-border-radius, 0.5rem);
+  cursor: pointer;
+}
+
+.o-expansion-pack--enslaved--bought {
+  color: black;
+  background: var(--color-enslaved--base);
+  border: var(--var-border-width, 0.2rem) solid var(--color-enslaved--base);
+  border-radius: var(--var-border-radius, 0.5rem);
+}
+
+.o-expansion-pack--v {
+  color: var(--color-v--base);
+  background: black;
+  border: var(--var-border-width, 0.2rem) solid var(--color-v--base);
+  border-radius: var(--var-border-radius, 0.5rem);
+}
+
+.o-expansion-pack--v:hover {
+  color: black;
+  background: var(--color-v--base);
+  border: var(--var-border-width, 0.2rem) solid var(--color-v--base);
+  border-radius: var(--var-border-radius, 0.5rem);
+  cursor: pointer;
+}
+
+.o-expansion-pack--v--bought {
+  color: black;
+  background: var(--color-v--base);
+  border: var(--var-border-width, 0.2rem) solid var(--color-v--base);
+  border-radius: var(--var-border-radius, 0.5rem);
+}
+
+.o-expansion-pack--ra {
+  color: var(--color-ra--base);
+  background: black;
+  border: var(--var-border-width, 0.2rem) solid var(--color-ra--base);
+  border-radius: var(--var-border-radius, 0.5rem);
+}
+
+.o-expansion-pack--ra:hover {
+  color: black;
+  background: var(--color-ra--base);
+  border: var(--var-border-width, 0.2rem) solid var(--color-ra--base);
+  border-radius: var(--var-border-radius, 0.5rem);
+  cursor: pointer;
+}
+
+.o-expansion-pack--ra--bought {
+  color: black;
+  background: var(--color-ra--base);
+  border: var(--var-border-width, 0.2rem) solid var(--color-ra--base);
+  border-radius: var(--var-border-radius, 0.5rem);
+}
+
+.o-expansion-pack--laitela {
+  color: var(--color-laitela--accent);
+  background: black;
+  border: var(--var-border-width, 0.2rem) solid var(--color-laitela--accent);
+  border-radius: var(--var-border-radius, 0.5rem);
+}
+
+.o-expansion-pack--laitela:hover {
+  color: black;
+  background: var(--color-laitela--accent);
+  border: var(--var-border-width, 0.2rem) solid var(--color-laitela--accent);
+  border-radius: var(--var-border-radius, 0.5rem);
+  cursor: pointer;
+}
+
+.o-expansion-pack--laitela--bought {
+  color: black;
+  background: var(--color-laitela--accent);
+  border: var(--var-border-width, 0.2rem) solid var(--color-laitela--accent);
+  border-radius: var(--var-border-radius, 0.5rem);
+}
+
+.o-expansion-pack--pelle {
+  color: var(--color-pelle--base);
+  background: black;
+  border: var(--var-border-width, 0.2rem) solid var(--color-pelle--base);
+  border-radius: var(--var-border-radius, 0.5rem);
+}
+
+.o-expansion-pack--pelle:hover {
+  color: black;
+  background: var(--color-pelle--base);
+  border: var(--var-border-width, 0.2rem) solid var(--color-pelle--base);
+  border-radius: var(--var-border-radius, 0.5rem);
+  cursor: pointer;
+}
+
+.o-expansion-pack--pelle--bought {
+  color: black;
+  background: var(--color-pelle--base);
+  border: var(--var-border-width, 0.2rem) solid var(--color-pelle--base);
+  border-radius: var(--var-border-radius, 0.5rem);
 }
 
 /* #region reality-tab */

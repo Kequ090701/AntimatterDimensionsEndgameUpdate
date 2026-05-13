@@ -14,6 +14,7 @@ export default {
       eternityUnlocked: false,
       realityUnlocked: false,
       alchemyUnlocked: false,
+      endgameUnlocked: false,
 
       showPercentage: false,
       achievements: false,
@@ -24,6 +25,9 @@ export default {
       realityUpgrades: false,
       perks: false,
       alchemy: false,
+      masteries: false,
+      breakEternityUpgrades: false,
+      endgameUpgrades: false,
     };
   },
   computed: {
@@ -59,6 +63,15 @@ export default {
     alchemy(newValue) {
       player.options.showHintText.alchemy = newValue;
     },
+    masteries(newValue) {
+      player.options.showHintText.masteries = newValue;
+    },
+    breakEternityUpgrades(newValue) {
+      player.options.showHintText.breakEternityUpgrades = newValue;
+    },
+    endgameUpgrades(newValue) {
+      player.options.showHintText.endgameUpgrades = newValue;
+    },
   },
   methods: {
     update() {
@@ -67,6 +80,7 @@ export default {
       this.eternityUnlocked = this.fullCompletion || progress.isEternityUnlocked;
       this.realityUnlocked = this.fullCompletion || progress.isRealityUnlocked;
       this.alchemyUnlocked = this.fullCompletion || Ra.unlocks.effarigUnlock.canBeApplied;
+      this.endgameUnlocked = this.fullCompletion || progress.isEndgameUnlocked;
 
       const options = player.options.showHintText;
       this.showPercentage = options.showPercentage;
@@ -78,6 +92,9 @@ export default {
       this.realityUpgrades = options.realityUpgrades;
       this.perks = options.perks;
       this.alchemy = options.alchemy;
+      this.masteries = options.masteries;
+      this.breakEternityUpgrades = options.breakEternityUpgrades;
+      this.endgameUpgrades = options.endgameUpgrades;
     }
   },
 };
@@ -130,6 +147,21 @@ export default {
         v-if="alchemyUnlocked"
         v-model="alchemy"
         text="Alchemy resource amounts:"
+      />
+      <ModalOptionsToggleButton
+        v-if="endgameUnlocked"
+        v-model="masteries"
+        text="Endgame Mastery IDs:"
+      />
+      <ModalOptionsToggleButton
+        v-if="endgameUnlocked"
+        v-model="breakEternityUpgrades"
+        text="Break Eternity Upgrade names:"
+      />
+      <ModalOptionsToggleButton
+        v-if="endgameUnlocked"
+        v-model="endgameUpgrades"
+        text="Endgame Upgrade names:"
       />
     </div>
     Note: All types of additional info above will always display when holding shift.

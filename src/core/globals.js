@@ -17,7 +17,10 @@ export * from "./storage";
 export * from "./notations";
 export * from "./tutorial";
 
-export * from "./new-game";
+export * from "./endgame";
+export * from "./galactic-power";
+export * from "./expansion-packs";
+export * from "./ethereal";
 
 export * from "./celestials/quotes";
 export * from "./celestials/teresa";
@@ -34,6 +37,8 @@ export * from "./celestials/pelle/strikes";
 export * from "./celestials/pelle/rifts";
 export * from "./celestials/pelle/galaxy-generator";
 export * from "./celestials/pelle/game-end";
+export * from "./celestials/pelle/pelle-destruction-upgrades";
+export * from "./celestials/alpha";
 export * from "./celestials/celestials";
 
 export * from "./automator";
@@ -61,8 +66,10 @@ export * from "./tickspeed";
 export * from "./dimensions/antimatter-dimension";
 export * from "./dimensions/infinity-dimension";
 export * from "./dimensions/time-dimension";
+export * from "./dimensions/celestial-dimension";
 
 export * from "./time-studies";
+export * from "./endgame-masteries";
 
 export * from "./dimboost";
 export * from "./sacrifice";
@@ -76,12 +83,15 @@ export * from "./eternity-challenge";
 export * from "./reality";
 export * from "./replicanti";
 export * from "./time-theorems";
+export * from "./endgame-skills";
 export * from "./reality-upgrades";
 export * from "./imaginary-upgrades";
+export * from "./endgame-upgrades";
 export * from "./perks";
 export * from "./dilation";
 export * from "./black-hole";
 export * from "./machines";
+export * from "./break-eternity-upgrades";
 export * from "./devtools";
 export * from "./news-ticker";
 export * from "./shop";

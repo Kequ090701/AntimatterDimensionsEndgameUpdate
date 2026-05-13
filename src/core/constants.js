@@ -1,9 +1,12 @@
+import { cloneDeep } from "lodash";
+
 window.PRESTIGE_EVENT = {
   DIMENSION_BOOST: 0,
   ANTIMATTER_GALAXY: 1,
   INFINITY: 2,
   ETERNITY: 3,
   REALITY: 4,
+  ENDGAME: 5,
 };
 
 function deepFreeze(obj) {
@@ -14,7 +17,7 @@ function deepFreeze(obj) {
   return Object.freeze(obj);
 }
 
-export const DC = deepFreeze({
+window.DC = deepFreeze({
   // Naming Scheme:
   // D[0-9]: Decimal mantissa variable
   // _: decimal (.) part of the mantissa
@@ -47,9 +50,24 @@ export const DC = deepFreeze({
   D3:                   new Decimal("3"),
   D4:                   new Decimal("4"),
   D5:                   new Decimal("5"),
+  D6:                   new Decimal("6"),
   D6_66:                new Decimal("6.66"),
+  D7:                   new Decimal("7"),
+  D8:                   new Decimal("8"),
+  D9:                   new Decimal("9"),
+  D11:                  new Decimal("11"),
+  D12:                  new Decimal("12"),
+  D13:                  new Decimal("13"),
+  D14:                  new Decimal("14"),
   D15:                  new Decimal("15"),
   D16:                  new Decimal("16"),
+  D17:                  new Decimal("17"),
+  D18:                  new Decimal("18"),
+  D19:                  new Decimal("19"),
+  D20:                  new Decimal("20"),
+  D60:                  new Decimal("60"),
+  D80:                  new Decimal("80"),
+  D99:                  new Decimal("99"),
   D11111:               new Decimal("11111"),
   D3E4:                 new Decimal("30000"),
   D2E5:                 new Decimal("2e5"),
@@ -72,6 +90,7 @@ export const DC = deepFreeze({
   E1:                   new Decimal("1e1"),
   E2:                   new Decimal("1e2"),
   E3:                   new Decimal("1e3"),
+  E4:                   new Decimal("1e4"),
   E5:                   new Decimal("1e5"),
   E6:                   new Decimal("1e6"),
   E8:                   new Decimal("1e8"),
@@ -159,6 +178,8 @@ export const DC = deepFreeze({
   E12000:               new Decimal("1e12000"),
   E13000:               new Decimal("1e13000"),
   E14000:               new Decimal("1e14000"),
+  E15000:               new Decimal("1e15000"),
+  E16000:               new Decimal("1e16000"),
   E16500:               new Decimal("1e16500"),
   E17500:               new Decimal("1e17500"),
   E18000:               new Decimal("1e18000"),
@@ -189,8 +210,21 @@ export const DC = deepFreeze({
   E4E7:                 new Decimal("1e40000000"),
   E6E7:                 new Decimal("1e60000000"),
   E1E8:                 new Decimal("1e100000000"),
+  E1E12:                new Decimal("1e1000000000000"),
   E1_5E12:              new Decimal("1e1500000000000"),
   E1E15:                new Decimal("1e1000000000000000"),
+  E9E15:                new Decimal("1e9000000000000000"),
+
+  //Hardcoded post-e9e15 values to be reformatted later
+  E9E115:               Decimal.pow(10, 9e115),
+  E1E300:               Decimal.pow(10, 1e300),
+  ENUMMAX:              Decimal.pow(10, Number.MAX_VALUE),
+
+  // Special case values
+  NUMSAFE:              new Decimal(Number.MAX_SAFE_INTEGER),
+  NUMMAX:               new Decimal(Number.MAX_VALUE),
+  BIMAX:                new Decimal("e9e15"),
+  BEMAX:                new Decimal("10^^9000000000000000")
 });
 
 window.AUTOBUYER_MODE = {
@@ -220,6 +254,14 @@ window.AUTO_REALITY_MODE = {
   RELIC_SHARD: 5,
 };
 
+window.AUTO_ENDGAME_MODE = {
+  AMOUNTCP: 0,
+  AMOUNTDP: 1,
+  TIME: 2,
+  X_HIGHEST_CP: 3,
+  X_HIGHEST_DP: 4
+};
+
 window.RECENT_PRESTIGE_RESOURCE = {
   ABSOLUTE_GAIN: 0,
   RATE: 1,
@@ -237,6 +279,13 @@ window.GLYPH_MIME_TYPE = "text/x-ivark-glyph";
 // in order for reality glyph color parsing to work properly in the cosmetic handler
 window.GlyphRarities = [
   {
+    minStrength: 4.125,
+    name: "Elysian",
+    darkColor: "#8020a0",
+    lightColor: "#8020a0",
+    darkHighContrast: "#a000a0",
+    lightHighContrast: "#800080"
+  }, {
     minStrength: 3.5,
     name: "Celestial",
     darkColor: "#3d3dec",
@@ -422,6 +471,30 @@ window.TS_REQUIREMENT_TYPE = {
   DIMENSION_PATH: 2,
 };
 
+window.ENDGAME_MASTERY_PATH = {
+  NONE: 0,
+  ANTIMATTER_DIM_COMPRESSION: 1,
+  INFINITY_DIM_COMPRESSION: 2,
+  TIME_DIM_COMPRESSION: 3,
+  CELESTIAL_DIM_COMPRESSION: 4,
+  INFINITY_POINTS: 5,
+  ETERNITY_POINTS: 6,
+  REALITY_MACHINES: 7,
+  IMAGINARY_MACHINES: 8
+};
+
+window.ENDGAME_MASTERY_TYPE = {
+  NORMAL: 0,
+  PERMANENT: 1
+};
+
+window.EM_REQUIREMENT_TYPE = {
+  AT_LEAST_ONE: 0,
+  ALL: 1,
+  COMPRESSION_PATH: 2,
+  CURRENCY_PATH: 3,
+};
+
 window.ALCHEMY_RESOURCE = {
   POWER: 0,
   INFINITY: 1,
@@ -505,3 +578,5 @@ window.SPEEDRUN_SEED_STATE = {
   RANDOM: 2,
   PLAYER: 3,
 };
+
+window.cloneDeep = value => cloneDeep(value);

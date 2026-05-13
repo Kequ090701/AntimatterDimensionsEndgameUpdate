@@ -22,17 +22,81 @@ export const GalaxyGenerator = {
   },
 
   get galaxies() {
-    return this.generatedGalaxies - this.spentGalaxies;
+    return this.generatedGalaxies.sub(this.spentGalaxies);
   },
 
-  get gainPerSecond() {
-    if (!Pelle.hasGalaxyGenerator) return 0;
+  get gainPerSecondPreCap() {
+    let extraGain = 1;
+    if (EndgameMilestone.moreFasterGalaxies.isReached) extraGain = Decimal.pow(10, Math.min(Currency.endgames.value / 200, 50)).times(Decimal.pow(10, Math.max((Math.log10(Currency.endgames.value + 1) - 4) * 50, 0)));
+    if (!Pelle.hasGalaxyGenerator) return new Decimal(0);
     return new Decimal(GalaxyGeneratorUpgrades.additive.effectValue).timesEffectsOf(
       GalaxyGeneratorUpgrades.multiplicative,
       GalaxyGeneratorUpgrades.antimatterMult,
       GalaxyGeneratorUpgrades.IPMult,
       GalaxyGeneratorUpgrades.EPMult,
-    ).toNumber();
+      GalaxyGeneratorUpgrades.RSMult
+    ).times(extraGain);
+  },
+
+  get galGenInstability() {
+    const extraReduction = ExpansionPack.pellePack.isBought ? 1 : 0;
+    const reduction = Effects.sum(EndgameMastery(122), Achievement(196), EndgameUpgrade(12)) + extraReduction;
+    let powReduction = 1;
+    if (EndgameMilestone.instabilityReduction.isReached) powReduction = Math.pow(1 / Math.log10(Currency.endgames.value + 1), 0.1);
+    return Math.pow(10 - reduction, powReduction);
+  },
+
+  get harshInstabilityStart() {
+    return 1e60;
+  },
+
+  harshGalGenInstabilityByGalaxies(currGalaxies) {
+    const extremePower = GalacticPowers.galGenInstability2.isUnlocked ? GalacticPowers.galGenInstability2.reward : 1;
+    const power = (Decimal.log10(Decimal.max(currGalaxies.div(this.harshInstabilityStart), 1)).div(1000)).times(Effects.product(EndgameUpgrade(14))).times(1 / extremePower).toNumber();
+    return Math.pow(1 + power, Decimal.log10(Decimal.max(currGalaxies.div(this.harshInstabilityStart), 1)).toNumber());
+  },
+
+  get harshGalGenInstability() {
+    const currGalaxies = player.galaxies.add(GalaxyGenerator.galaxies);
+    return this.harshGalGenInstabilityByGalaxies(currGalaxies);
+  },
+
+  get instabilityStart() {
+    const delay = GalacticPowers.galGenInstability1.isUnlocked ? GalacticPowers.galGenInstability1.reward : 1;
+    return 1e10 * delay;
+  },
+
+  gainPerSecondPostCapByGalaxies(currGalaxies) {
+    if (!Pelle.hasGalaxyGenerator) return new Decimal(1);
+    return Decimal.max(1, Decimal.pow(Decimal.pow(this.galGenInstability, this.harshGalGenInstabilityByGalaxies(currGalaxies)), Decimal.log10(Decimal.max(Decimal.pow(currGalaxies.div(this.instabilityStart), 0.75), 1))));
+  },
+
+  get gainPerSecondPostCap() {
+    if (!Pelle.hasGalaxyGenerator) return new Decimal(1);
+    const currGalaxies = player.galaxies.add(GalaxyGenerator.galaxies);
+    return this.gainPerSecondPostCapByGalaxies(currGalaxies);
+  },
+
+  get gainPerSecond() {
+    if (!Pelle.hasGalaxyGenerator) return new Decimal(0);
+    return this.gainPerSecondPreCap.div(this.gainPerSecondPostCap);
+  },
+
+  gainPerSecondDisplay(neededCount) {
+    // Equals to 1/gainPerSecond
+    function g(x) {
+      return new Decimal(GalaxyGenerator.gainPerSecondPostCapByGalaxies(x)).div(GalaxyGenerator.gainPerSecondPreCap);
+    }
+
+    const currGalaxies = player.galaxies.add(GalaxyGenerator.galaxies);
+    const N = 1000;
+    const h = new Decimal(neededCount).sub(currGalaxies).div(N);
+    let s = g(currGalaxies).add(g(neededCount));
+    for (let i = 1; i <= N - 1; i++) {
+      const x = currGalaxies.add(h.mul(i));
+      s = s.add(g(x).mul((i & 1) ? 4 : 2));
+    }
+    return s.mul(h).div(3);
   },
 
   get capObj() {
@@ -48,7 +112,7 @@ export const GalaxyGenerator = {
   },
 
   get isCapped() {
-    return this.generationCap === this.generatedGalaxies;
+    return new Decimal(this.generationCap).eq(this.generatedGalaxies);
   },
 
   get sacrificeActive() {
@@ -65,7 +129,9 @@ export const GalaxyGenerator = {
       Pelle.quotes.galaxyGeneratorRifts.show();
     }
     if (this.sacrificeActive) {
-      this.capRift.reducedTo = Math.max(this.capRift.reducedTo - 0.075 * diff / 1000, 0);
+      let reductionSpeed = 0.075;
+      if (EndgameMilestone.galGenAnimation.isReached) reductionSpeed = reductionSpeed * Math.pow(1.2, Math.floor(Math.min(Currency.endgames.value, 100) / 5));
+      this.capRift.reducedTo = Decimal.max(new Decimal(this.capRift.reducedTo).sub(new Decimal(reductionSpeed).times(diff).div(1000)), 0).toNumber();
       if (this.capRift.reducedTo === 0) {
         player.celestials.pelle.galaxyGenerator.sacrificeActive = false;
         player.celestials.pelle.galaxyGenerator.phase++;
@@ -92,14 +158,14 @@ export const GalaxyGenerator = {
       }
 
     }
-    player.celestials.pelle.galaxyGenerator.generatedGalaxies += this.gainPerSecond * diff / 1000;
-    player.celestials.pelle.galaxyGenerator.generatedGalaxies = Math.min(
+    player.celestials.pelle.galaxyGenerator.generatedGalaxies = player.celestials.pelle.galaxyGenerator.generatedGalaxies.add(Decimal.max(this.gainPerSecond.times(diff).div(1000), 0));
+    player.celestials.pelle.galaxyGenerator.generatedGalaxies = Decimal.min(
       player.celestials.pelle.galaxyGenerator.generatedGalaxies,
       this.generationCap
     );
 
     if (!this.capRift) {
-      PelleRifts.all.forEach(r => r.reducedTo = Math.min(r.reducedTo + 0.05 * diff / 1000, 2));
+      PelleRifts.all.forEach(r => r.reducedTo = new Decimal(diff).div(1e5).times(3).add(r.reducedTo).clampMax(2).toNumber());
       if (PelleRifts.vacuum.milestones[0].canBeApplied && !this.hasReturnedGlyphSlot) {
         Glyphs.refreshActive();
         EventHub.dispatch(GAME_EVENT.GLYPHS_EQUIPPED_CHANGED);

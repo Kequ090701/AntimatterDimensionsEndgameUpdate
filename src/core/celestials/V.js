@@ -1,4 +1,4 @@
-import { BitUpgradeState, GameMechanicState } from "../game-mechanics";
+import { BitUpgradeState, GameMechanicState, RebuyableMechanicState } from "../game-mechanics";
 import { GameDatabase } from "../secret-formula/game-database";
 
 import { SpeedrunMilestones } from "../speedrun";
@@ -80,7 +80,7 @@ class VRunUnlockState extends GameMechanicState {
 
     while (this.completions < this.config.values.length &&
     Decimal.gte(playerData.runRecords[this.id], this.conditionValue)) {
-      if (!V.isFlipped && this.config.isHard) continue;
+      if (!V.isFlipped && this.config.isHard) break;
       this.completions++;
       GameUI.notify.success(`You have unlocked V-Achievement
         '${this.config.name}' tier ${formatInt(this.completions)}`);
@@ -102,7 +102,7 @@ class VUnlockState extends BitUpgradeState {
   set bits(value) { player.celestials.v.unlockBits = value; }
 
   get pelleDisabled() {
-    return Pelle.isDoomed && this !== VUnlocks.vAchievementUnlock;
+    return Pelle.isDoomed && this !== VUnlocks.vAchievementUnlock && this.config.pelleDisabled();
   }
 
   get isEffectActive() {
@@ -152,6 +152,39 @@ export const VUnlocks = mapGameDataToObject(
   config => new VUnlockState(config)
 );
 
+class VUpgradeState extends RebuyableMechanicState {
+  constructor(config) {
+    super(config);
+    this.costCap = config.costCap;
+    this.effect = config.effect;
+  }
+
+  get currency() {
+    return Currency.celestialPoints;
+  }
+
+  get boughtAmount() {
+    return player.celestials.v.upgrades[this.id];
+  }
+
+  set boughtAmount(value) {
+    player.celestials.v.upgrades[this.id] = value;
+  }
+
+  get isCapped() {
+    return new Decimal(this.cost).gte(this.costCap);
+  }
+
+  get isAvailableForPurchase() {
+    return new Decimal(this.cost).lte(new Decimal(this.currency.value));
+  }
+}
+
+export const VUpgrade = mapGameDataToObject(
+  GameDatabase.celestials.vUpgrades,
+  config => new VUpgradeState(config)
+);
+
 export const V = {
   displayName: "V",
   possessiveName: "V's",
@@ -169,7 +202,7 @@ export const V = {
       if (this.spaceTheorems >= 36) SpeedrunMilestones(22).tryComplete();
     }
 
-    if (VUnlocks.raUnlock.canBeApplied && !Ra.unlocks.autoTP.canBeApplied) {
+    if ((VUnlocks.raUnlock.canBeApplied || EndgameMilestone.celestialEarlyUnlock.isReached) && !Ra.unlocks.autoTP.canBeApplied) {
       Ra.checkForUnlocks();
     }
   },
@@ -192,7 +225,7 @@ export const V = {
       if (i < 6) sum += player.celestials.v.runUnlocks[i];
       else sum += player.celestials.v.runUnlocks[i] * 2;
     }
-    this.spaceTheorems = sum;
+    this.spaceTheorems = sum * (ExpansionPack.vPack.isBought ? 2 : 1) * Ra.unlocks.spaceTheoremBoost.effectOrDefault(1);
   },
   reset() {
     player.celestials.v = {
@@ -203,7 +236,7 @@ export const V = {
       goalReductionSteps: [0, 0, 0, 0, 0, 0, 0, 0, 0],
       STSpent: 0,
       runGlyphs: [[], [], [], [], [], [], [], [], []],
-      runRecords: [-10, 0, 0, 0, 0, 0, 0, 0, 0],
+      runRecords: [DC.E1.neg(), DC.D0, DC.D0, DC.D0, DC.D0, DC.D0, DC.D0, DC.D0, DC.D0],
     };
     this.spaceTheorems = 0;
   },
@@ -231,4 +264,9 @@ export const V = {
 
 EventHub.logic.on(GAME_EVENT.TAB_CHANGED, () => {
   if (Tab.celestials.v.isOpen) V.quotes.initial.show();
+});
+
+EventHub.logic.on(GAME_EVENT.GAME_TICK_AFTER, () => {
+  if (EndgameMastery(51).isBought) GameDatabase.celestials.v.mainUnlock.realities.requirement = 100;
+  if (!EndgameMastery(51).isBought) GameDatabase.celestials.v.mainUnlock.realities.requirement = 1250;
 });
